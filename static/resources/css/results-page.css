@@ -1,0 +1,8 @@
+div.post{
+	padding:5px;
+	cursor: pointer;
+}
+
+div.post:hover{
+	background-color: gray;
+}

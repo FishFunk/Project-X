@@ -1,0 +1,79 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html ng-app="projectX" lang="en">
+    <head>
+      <title>Project X</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <!-- SCROLLS -->
+      <link rel="stylesheet" href="{{url_for('static', filename='resources/bootstrap-3.2.0/css/bootstrap.min.css')}}" />
+      <link rel="stylesheet" href="{{url_for('static', filename='resources/bootstrap-3.2.0/css/bootstrap-theme.min.css')}}" />
+      <link rel="stylesheet" href="{{url_for('static', filename='resources/bootstrap-3.2.0/css/ui-bootstrap-csp.css')}}" />
+      <link rel="stylesheet" href="{{url_for('static', filename='resources/font-awesome-4.3.0/css/font-awesome.min.css')}}" />
+      <link rel="stylesheet" href="{{url_for('static', filename='resources/css/home-page-styles.css')}}" />
+      <link rel="stylesheet" href="{{url_for('static', filename='resources/css/create-post-page-styles.css')}}" />
+      <link rel="stylesheet" href="{{url_for('static', filename='resources/css/master.css')}}" />
+      <link rel="stylesheet" href="{{url_for('static', filename='resources/css/angular.rangeSlider.css')}}" />
+      <link rel="stylesheet" href="{{url_for('static', filename='resources/css/results-page.css')}}" />
+      <!-- SPELLS -->
+      <script src="{{url_for('static', filename='resources/jquery-2.1.3.min.js')}}"></script>
+      <script src="{{url_for('static', filename='resources/angular.min.js')}}"></script>
+      <script src="{{url_for('static', filename='resources/angular-route.min.js')}}"></script>
+      <script src="{{url_for('static', filename='resources/angular-file-upload-all.min.js')}}"></script>
+      <script src="{{url_for('static', filename='resources/bootstrap-3.2.0/js/bootstrap.min.js')}}"></script>
+      <script src="{{url_for('static', filename='resources/bootstrap-3.2.0/js/ui-bootstrap-0.13.0.min.js')}}"></script>
+      <script src="{{url_for('static', filename='resources/bootstrap-3.2.0/js/ui-bootstrap-tpls.min.js')}}"></script>
+      <script src="{{url_for('static', filename='resources/bootbox.min.js')}}"></script>
+      <script src="{{url_for('static', filename='resources/angular.rangeSlider.js')}}"></script>
+      <script src="{{url_for('static', filename='script.js')}}"></script>
+    </head>
+    <body ng-controller="mainController">
+      <!-- HEADER AND NAVBAR -->
+      <header class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#/">Project X</a>
+                    <button class="navbar-toggle" data-toggle="collapse" data-target=".navHeaderCollapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse navHeaderCollapse">
+                  <ul id="nav-list" class="nav navbar-nav navbar-right center-block">
+                      <li><a href="#createPost"><i class="fa fa-plus"></i> Post</a></li>
+                      <li><a href="#contact"><i class="fa fa-star"></i> Favs</a></li>
+                      <li class="dropdown">
+                        <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                          <i class="fa fa-question"></i>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                          <li class="center-block"><a href="">About</a></li>
+                          <li class="center-block"><a href="">Cool Tips</a></li>
+                          <li class="center-block"><a href="#contact">Contact Us</a></li>
+                        </ul>
+                      </li>
+                  </ul>
+                </div>
+            </div>
+      </header>
+
+      <!-- MAIN CONTENT AND INJECTED VIEWS -->
+      <div id="wrap">
+        <div id="main" class="container-fluid">
+            <!-- angular templating -->
+            <!-- this is where content will be injected -->
+            <div ng-view></div>
+
+        </div>
+      </div>
+      <hr>
+      <div id="footer">
+        <div class="container-fluid center-block">
+          <p class="text-muted">Copyright (c) 2015</p>
+        </div>
+      </div>
+
+    </body>
+
+</html>

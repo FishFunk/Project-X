@@ -1,0 +1,48 @@
+<div class="container-fluid">
+  <div class="row">
+    <div style="margin:0px 0px 15px 15px">
+        <button class="btn btn-md btn-default" ng-click="onShowResults()">
+          <i class="glyphicon glyphicon-chevron-left"></i>
+          <i class="glyphicon glyphicon-chevron-left"></i>
+          <i class="glyphicon glyphicon-chevron-left"></i>
+        </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <div class="panel panel-default" style="height: 305px">
+        <header class="panel-heading">
+          <h4 class="panel-title">{{post.Title}}</h4>
+        </header>
+        <div class="panel-body">
+            <div>
+              <h4>${{post.Price}}</h4>
+              <p>{{post.Description}}</p>
+            </div>
+            <div>
+              <h6>{{post.Location}}</h6>
+              <h6>{{post.Email}}</h6>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-6">
+      <carousel style="height: 305px">
+        <slide active="slide.active">
+          <img src="static/resources/img/placeholder.jpeg" style="margin:auto; height:300px;">
+          <div class="carousel-caption">
+            <h4>Slide Demo</h4>
+            <p>Description</p>
+          </div>
+        </slide>
+        <slide>
+          <img src="static/resources/img/placeholder.jpeg" style="margin:auto; height:300px">
+          <div class="carousel-caption">
+            <h4>Slide Demo</h4>
+            <p>Description</p>
+          </div>
+        </slide>
+      </carousel>
+    </div><!--images-->
+  </div><!--.row-->
+</div><!--container-->

@@ -1,0 +1,57 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <div id="form-panel" class="panel panel-default">
+        <header class="panel-heading">
+          <h4 class="panel-title">Post Details</h4>
+        </header>
+        <div class="panel-body">
+          <h5>Post Info</h5>
+          <form role="form" class="form-inline">
+            <div class="form-group">
+              <input type="text" ng-model="post.title" class="form-control" placeholder="What am I?" required>
+              <input type="number" ng-model="post.location" class="form-control" placeholder="Zip Code" required>
+              $<input type="number" ng-model="post.price" class="form-control" placeholder="1,000,000" required>.00
+            </div>
+          </form>
+          <form role="form">
+            <div class="form-group">
+              <textarea class="form-control" ng-model="post.description" placeholder="Describe me!" required></textarea>
+            </div>
+          </form>
+          <form role="form">
+            <h5>Contact Info</h5>
+            <div class="form-group">
+              <input type="email" ng-model="post.email" class="form-control" placeholder="johnny.appleseed@example.com" required>
+              <input type="text" ng-model="post.phone" class="form-control" placeholder="123.456.7890" required>
+            </div>
+          </form>
+        </div>
+      </div><!--#form-panel-->
+    </div>
+    <div id="images" class="col-xs-12 col-sm-6">
+      <div ng-file-select ng-file-drop ng-model="droppedFile" ng-model-rejected="rejFiles" ng-accept="accept" accept="image/*" ng-disabled="disabled" ng-capture="capture" drag-over-class="{accept:'dragover', reject:'dragover-err', delay:100}" class="big-drop-box ng-pristine ng-valid" drop-available="dropAvailable">Click to Upload
+      <br><span ng-show="dropAvailable">or Drag/Drop</span>
+      <br><span><i class="fa fa-camera"></i></span>
+      </div>
+    </div>
+  </div><!--.row-->
+
+  <div class="row">
+    <div id="img-upload-well" class="well well-lg">
+      <h4>Uploaded Images</h4>
+      <ul id="small-img-list" class="list-inline">
+        <li ng-repeat="file in allFiles">
+          <img src="{{file.url}}" class="img-thumbnail" width="150" height="150"></img>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="center-block">
+        <button class="btn btn-lg btn-primary" ng-click="onShowPreview()">Next</button>
+        <button class="btn btn-lg btn-default" ng-click="onCancel()">Cancel</button>
+    </div>
+  </div>
+</div><!--container-->

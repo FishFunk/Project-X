@@ -1,0 +1,14 @@
+<!-- home.html -->
+<div class="container-fluid">
+	<h1 id="header-text">{{ header }}</h1>
+	<div id="search-bar-row" class="row">
+	  <div class="col-xs-12">
+	    <div class="input-group">
+	      <input id="search-text-field" ng-model="searchField" ng-submit="search()" placeholder="What are you looking for?" type="text" class="form-control" ng-Enter="search()">
+	      <span class="input-group-btn">
+	        <button id="search-button" ng-click="search()" class="btn btn-default">Go!</button>
+	      </span>
+	    </div><!-- /input-group -->
+	  </div><!-- /.col-xs-12 -->
+	</div><!-- /.row -->
+</div>

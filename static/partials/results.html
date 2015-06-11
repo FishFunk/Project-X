@@ -1,0 +1,46 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-xs-12">
+      <!-- Filter Options -->
+      <div class="well">
+        <p>Good news! We found some results for "<span>{{searchVal}}</span>"</p>
+        <form class="form-inline">
+          <div class="form-group">
+            <label>Filter</label>
+            <input type="text" class="form-control" placeholder="Excellent condition">
+          </div>
+          <!-- Single button -->
+          <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              Order By <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="#">Relevance</a></li>
+              <li><a href="#">Newest</a></li>
+              <li><a href="#">Most $$$</a></li>
+              <li><a href="#">Least $$$</a></li>
+              <li><a href="#">Distance</a></li>
+            </ul>
+          </div>
+        </form>
+        <div style="margin-top:5px">
+          <label>Range:&nbsp;</label>{{distanceRange}} miles
+          <div range-slider min="5" max="500" model-max="distanceRange" pin-handle="min"></div>
+        </div>
+      </div>
+    </div>
+  </div><!--.row-->
+  <div class="row">
+    <div class="col-xs-12">
+      <ul class="list-inline">
+        <li ng-repeat="post in results">
+          <div id="post" class="post" ng-click="onLoadPost(post)">
+            <img src="static/resources/img/placeholder.jpeg"></img>
+            <h4>{{post.Title}}</h4>
+            <h5>${{post.Price}}<h5>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div><!--.row-->
+</div><!--container-->
