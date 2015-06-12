@@ -56,6 +56,27 @@
                         return null;
                     }
                     return JSON.parse(sessionStorage.livePost)
+                },
+                addFavorite: function(post){
+                    var favorites;
+                    if(!sessionStorage.favorites)
+                    {
+                        favorites = [];
+                    }
+                    else
+                    {
+                        favorites = JSON.parse(sessionStorage.favorites);
+                    }
+
+                    favorites.push(post);
+                    sessionStorage.favorites = JSON.stringify(favorites);
+                },
+                getFavorites: function(){
+                    if(!sessionStorage.favorites)
+                    {
+                        return [];
+                    }
+                    return JSON.parse(sessionStorage.favorites);
                 }
             };
         }
@@ -118,6 +139,11 @@
         .when('/livePost', {
             templateUrl : 'static/partials/livePost.html',
             controller : 'livePostController'
+        })
+
+        .when('/favorites', {
+            templateUrl : 'static/partials/favorites.html',
+            controller : 'favoritesController'
         })
 
         // Default to home
@@ -229,6 +255,24 @@
         $scope.onShowResults = function(){
             $location.path("/results");
         };
+
+        $scope.onAddFavorite = function(){
+            sessionCache.addFavorite($scope.post);
+        };
+    });
+
+    // Favorites Controller
+    projectX.controller('favoritesController', function($scope, $location, $window, sessionCache) {
+        $scope.init = function(){
+            $scope.favorites = sessionCache.getFavorites();
+        };
+
+        $scope.init();
+
+        $scope.onLoadPost = function(post){
+            sessionCache.setLivePost(post);
+            $location.path("/livePost");
+        };
     });
 
     // About Page Controller
@@ -238,5 +282,5 @@
 
     // Contact Page Controller
     projectX.controller('contactController', function($scope) {
-        $scope.message = 'Sorry... You have no favorites yet because this is just a demo!';
+        $scope.message = 'We love to hear your feedback.';
     });

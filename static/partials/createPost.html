@@ -6,12 +6,11 @@
           <h4 class="panel-title">Post Details</h4>
         </header>
         <div class="panel-body">
-          <h5>Post Info</h5>
           <form role="form" class="form-inline">
             <div class="form-group">
               <input type="text" ng-model="post.title" class="form-control" placeholder="What am I?" required>
               <input type="number" ng-model="post.location" class="form-control" placeholder="Zip Code" required>
-              $<input type="number" ng-model="post.price" class="form-control" placeholder="1,000,000" required>.00
+              <input type="number" ng-model="post.price" class="form-control" placeholder="$1,000,000" required>
             </div>
           </form>
           <form role="form">
@@ -20,7 +19,6 @@
             </div>
           </form>
           <form role="form">
-            <h5>Contact Info</h5>
             <div class="form-group">
               <input type="email" ng-model="post.email" class="form-control" placeholder="johnny.appleseed@example.com" required>
               <input type="text" ng-model="post.phone" class="form-control" placeholder="123.456.7890" required>
@@ -50,8 +48,8 @@
 
   <div class="row">
     <div class="center-block">
-        <button class="btn btn-lg btn-primary" ng-click="onShowPreview()">Next</button>
         <button class="btn btn-lg btn-default" ng-click="onCancel()">Cancel</button>
+        <button class="btn btn-lg btn-primary" ng-click="onShowPreview()">Preview</button>
     </div>
   </div>
 </div><!--container-->
