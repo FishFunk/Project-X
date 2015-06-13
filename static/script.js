@@ -1,7 +1,7 @@
 // script.js
 
     // Create the app module
-    var projectX = angular.module('projectX', ['ngRoute','angularFileUpload', 'ui-rangeSlider', 'ui.bootstrap']);
+    var projectX = angular.module('projectX', ['ngRoute','angularFileUpload', 'ui.bootstrap']);
 
     // Database service
     projectX.factory('dbService', function ($http){
@@ -157,7 +157,8 @@
 
         $scope.header = 'Hello there!';
         $scope.searchField = "";
-        
+        $scope.favCount = "5";
+
         $scope.search = function() {
             sessionCache.setSearchText($scope.searchField);
         	dbService.search($scope.searchField)
@@ -226,6 +227,7 @@
             $scope.searchVal = sessionCache.getSearchText();
             $scope.results = sessionCache.getSearchResults();
             $scope.distanceRange = 25;
+            $('.selectpicker').selectpicker();
         };
 
         $scope.init();

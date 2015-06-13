@@ -6,3 +6,11 @@ div.post{
 div.post:hover{
 	background-color: gray;
 }
+
+.sort-picker {
+	width:100px !important;
+}
+
+.sort-picker > button{
+	width:100px !important;
+}
