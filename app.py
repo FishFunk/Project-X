@@ -18,7 +18,9 @@ def index():
 def search():
 	searchVal = request.get_json().get('searchVal')
 	resultPosts = dbService.searchPostTable(searchVal)
-	return json.dumps(resultPosts)
+	result = json.dumps(resultPosts)
+	print result
+	return result
 
 @app.route('/upload', methods=['GET','POST'])
 def upload():

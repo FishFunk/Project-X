@@ -31,7 +31,8 @@ class dbService(object):
 			posts = list()
 			for row in rows:
 				post = Post(row[1],row[2],row[3],row[4],row[5],row[6],row[7])
-				posts.append(post.postDict)
+				posts.append(post.getDict())
+				print posts
 
 			print "Found %s posts" % len(posts)
 			return posts

@@ -21,9 +21,6 @@
     // Session cache service
     projectX.factory('sessionCache', function(){
         
-        var searchText = "";
-        var searchResults = ""; // json object
-
         if(typeof(Storage) !== "undefined")
         {
             return {
@@ -58,18 +55,19 @@
                     return JSON.parse(sessionStorage.livePost)
                 },
                 addFavorite: function(post){
-                    var favorites;
-                    if(!sessionStorage.favorites)
+                    if(post == null)
                     {
-                        favorites = [];
-                    }
-                    else
-                    {
-                        favorites = JSON.parse(sessionStorage.favorites);
+                        return;
                     }
 
-                    favorites.push(post);
-                    sessionStorage.favorites = JSON.stringify(favorites);
+                    var favorites = (sessionStorage.favorites == null) ? [] : JSON.parse(sessionStorage.favorites);
+                    var addCondition = _.find(favorites, function(p){ return p.Guid == post.Guid }) == null;
+
+                    if(addCondition)
+                    {
+                        favorites.push(post);
+                        sessionStorage.favorites = JSON.stringify(favorites);
+                    }
                 },
                 getFavorites: function(){
                     if(!sessionStorage.favorites)
@@ -241,23 +239,30 @@
 
 
     // Live/Active Post Controller
-    projectX.controller('livePostController', function($scope, $location, sessionCache) {
+    projectX.controller('livePostController', function($scope, $window, sessionCache) {
         $scope.init = function(){
             $scope.post = sessionCache.getLivePost();
             var slides = $scope.post.Photos;
             $scope.addSlide = function(){
-
+                // Populate slides here
             };
+
+            $scope.isFavBtnDisabled = _.find(sessionCache.getFavorites(), function(p)
+                    { return p.Guid == $scope.post.Guid }) != null;
+            
+            $scope.favBtnText = ($scope.isFavBtnDisabled) ? "Favorited!" : "Add to Favorites";
         };
 
         $scope.init();
 
-        $scope.onShowResults = function(){
-            $location.path("/results");
+        $scope.onBack = function(){
+            $window.history.back();
         };
 
         $scope.onAddFavorite = function(){
             sessionCache.addFavorite($scope.post);
+            $scope.isFavBtnDisabled = true;
+            $scope.favBtnText = "Favorited!"
         };
     });
 

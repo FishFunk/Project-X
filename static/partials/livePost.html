@@ -37,13 +37,17 @@
     </div><!--images-->
   </div><!--.row-->
   <div class="center-block">
-    <button class="btn btn-md btn-default" ng-click="onShowResults()">
+    <button class="btn btn-md btn-default" ng-click="onBack()">
       <i class="fa fa-chevron-left" ></i>
       Back
     </button>
-    <button class="btn btn-md btn-success" ng-click="onAddFavorite()">
+    <button class="btn btn-md btn-success" ng-click="onAddFavorite()" ng-disabled="isFavBtnDisabled == true">
       <i class="fa fa-star"></i>
-      Add to Favorites
+      {{favBtnText}}
+    </button>
+    <button class="btn btn-md btn-danger" ng-click="onFlag()">
+      <i class="fa fa-flag"></i>
+      Flag
     </button>
   </div>
 </div><!--container-->
