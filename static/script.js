@@ -1,7 +1,7 @@
 // script.js
 
     // Create the app module
-    var projectX = angular.module('projectX', ['ngRoute','angularFileUpload', 'ui.bootstrap']);
+    var projectX = angular.module('projectX', ['ngRoute','angularFileUpload', 'ui.bootstrap', 'sprintf']);
 
     // Database service
     projectX.factory('dbService', function ($http){
@@ -155,21 +155,43 @@
     // Main/Home Page Controller
     projectX.controller('mainController', function($scope, $location, $http, dbService, sessionCache) {
 
-        $scope.header = 'Hello there!';
+        $scope.header = "";
         $scope.searchField = "";
-        $scope.favCount = "5";
+
+        generateGreeting = function(){
+            var msgs = [
+                "Ahoy Matey!",
+                "¡Hola Amigo!",
+                "You've come to the right place!",
+                "Let's find some good deals!",
+                "Hello Friend!",
+                "Fancy meeting you here. Come here often?"
+            ];
+
+            $scope.header = _.sample(msgs);
+        };
 
         $scope.search = function() {
             sessionCache.setSearchText($scope.searchField);
         	dbService.search($scope.searchField)
             .success(function(data, status, headers, config)
             {
-                sessionCache.setSearchResults(data);
-                $location.path('/results');
+                if(data != null && data.length == 0)
+                {
+                    var msg = sprintf("Sorry... we didn't find any listings that match '%s'. Try phrasing your search differently or check back again later!", $scope.searchField);
+                    bootbox.alert(msg);
+                }
+                else
+                {
+                    sessionCache.setSearchResults(data);
+                    $location.path('/results');
+                }
             })
             .error(function(data, status, headers, config)
             {});
         }
+
+        generateGreeting();
     });
 
     // Create Post Controller
@@ -226,8 +248,8 @@
         $scope.init = function(){
             $scope.searchVal = sessionCache.getSearchText();
             $scope.results = sessionCache.getSearchResults();
-            $scope.distanceRange = 25;
             $('.selectpicker').selectpicker();
+            $scope.resultsMsg = sprintf("Good news! We found %s listings for", $scope.results.length);
         };
 
         $scope.init();
