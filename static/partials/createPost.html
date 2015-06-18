@@ -8,20 +8,20 @@
         <div class="panel-body">
           <form role="form" class="form-inline">
             <div class="form-group">
-              <input type="text" ng-model="post.title" class="form-control" placeholder="What am I?" value="post.title" required>
-              <input type="number" ng-model="post.location" class="form-control" placeholder="Zip Code" value="post.location" required>
-              <input type="number" ng-model="post.price" class="form-control" placeholder="$1,000,000" value="post.price" required>
+              <input id="title" type="text" ng-model="post.title" class="form-control" placeholder="What am I?" value="post.title">
+              <input id="location" type="number" ng-model="post.location" class="form-control" placeholder="Zip Code" value="post.location">
+              <input id="price" type="number" ng-model="post.price" class="form-control" placeholder="$1,000,000" value="post.price">
             </div>
           </form>
           <form role="form">
             <div class="form-group">
-              <textarea class="form-control" ng-model="post.description" placeholder="Describe me!" required></textarea>
+              <textarea id="description" class="form-control" ng-model="post.description" placeholder="Describe me!"></textarea>
             </div>
           </form>
           <form role="form">
             <div class="form-group">
-              <input type="email" ng-model="post.email" class="form-control" placeholder="johnny.appleseed@example.com" required>
-              <input type="text" ng-model="post.phone" class="form-control" placeholder="123.456.7890" required>
+              <input id="email" type="email" ng-model="post.email" class="form-control" placeholder="johnny.appleseed@example.com">
+              <input id="phone" type="text" ng-model="post.phone" class="form-control" placeholder="123.456.7890">
             </div>
           </form>
         </div>
@@ -49,7 +49,7 @@
   <div class="row">
     <div class="center-block">
         <button class="btn btn-lg btn-default" ng-click="onCancel()">Cancel</button>
-        <button class="btn btn-lg btn-primary" type="submit" ng-click="onPreview()">Preview</button>
+        <button class="btn btn-lg btn-primary" ng-click="onPreview()">Preview</button>
     </div>
   </div>
 </div><!--container-->

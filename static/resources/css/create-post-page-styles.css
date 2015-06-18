@@ -30,3 +30,7 @@
 input {
 	color:black !important;
 }
+
+.bad-input{
+	border: 2px solid red;
+}

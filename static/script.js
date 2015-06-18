@@ -18,6 +18,18 @@
         };
     });
 
+    projectX.factory('utils', function(){
+        return {
+            isNumeric: function(value){
+                return !isNaN(parseFloat(value)) && isFinite(value);
+            },
+            isValidEmail: function(email){
+                var pattern = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+                return pattern.test(email);
+            }
+        };
+    });
+
     // Session cache service
     projectX.factory('sessionCache', function(){
         
@@ -210,14 +222,13 @@
     });
 
     // Create Post Controller
-    projectX.controller('createPostController', function($scope, $location, $window, sessionCache){
+    projectX.controller('createPostController', function($scope, $location, $window, sessionCache, utils){
 
         var reader = new FileReader();
-        $scope.allFiles = [];
 
         $scope.init = function(){
             $scope.post = sessionCache.getNewPost();
-            $scope.allFiles = $scope.post.photos;
+            $scope.allFiles = ($scope.post != null) ? $scope.post.photos : [];
         };
 
         $scope.init();
@@ -238,18 +249,58 @@
         });
 
         $scope.onPreview = function(){
-            // TODO: Properly Verify Inputs
-            if(!$scope.post.title || !$scope.post.location || !$scope.post.price ||
-               !$scope.post.description || !$scope.post.email)
+            if(!$scope.post)
             {
-                bootbox.alert("One or more required fields are empty.");
+                $("input").addClass("bad-input");
+                $("textarea").addClass("bad-input");
                 return;
             }
 
-            // TODO: Properly Verify Photos
-            if($scope.post.photos.length < 1)
+            $("input").removeClass("bad-input");
+            $("textarea").removeClass("bad-input");
+            var problemCount = 0;
+            var message = "Oh no! There are some problems with your post.<BR><BR>"
+            // TODO: Properly Verify Inputs
+            if(!$scope.post.title)
             {
-                bootbox.alert("You must upload at least one image.");
+                problemCount++;
+                $("input#title").addClass("bad-input");
+                message+=sprintf("%s. The 'Title' field can not be empty.<BR>", problemCount);
+            }
+            if(!$scope.post.location || !utils.isNumeric($scope.post.location) || $scope.post.length > 9)
+            {
+                problemCount++;
+                $("input#location").addClass("bad-input");
+                message+=sprintf("%s. Please enter a valid zip code.<BR>", problemCount);
+            } 
+            if(!$scope.post.price || !utils.isNumeric($scope.post.price))
+            {
+                problemCount++;
+                $("input#price").addClass("bad-input");
+                message+=sprintf("%s. Please enter a valid price value.<BR>", problemCount);
+            }
+            if(!$scope.post.description)
+            {
+                problemCount++;
+                $("textarea#description").addClass("bad-input");
+                message+=sprintf("%s. 'Description' is a required field.<BR>", problemCount);
+            }
+            if(!$scope.post.email || !utils.isValidEmail($scope.post.email))
+            {
+                problemCount++;
+                $("input#email").addClass("bad-input");
+                message+=sprintf("%s. Please enter a valid email address.<BR>", problemCount);
+            }
+            if(!$scope.post.photos || $scope.post.photos.length < 1)
+            {
+                problemCount++;
+                message+=sprintf("%s. We require that you upload at least one relevant image for your ad.<BR>", problemCount);
+            }
+            
+            if(problemCount > 0)
+            {
+                bootbox.alert(message);
+                return;
             }
 
             sessionCache.setNewPost($scope.post);
