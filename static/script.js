@@ -45,14 +45,24 @@
                     return sessionStorage.searchText;
                 },
                 setLivePost: function(post){
-                    sessionStorage.livePost = JSON.stringify(post)
+                    sessionStorage.post = JSON.stringify(post)
                 },
                 getLivePost: function(){
-                    if(!sessionStorage.livePost)
+                    if(!sessionStorage.post)
                     {
                         return null;
                     }
-                    return JSON.parse(sessionStorage.livePost)
+                    return JSON.parse(sessionStorage.post)
+                },
+                setNewPost: function(post){
+                    sessionStorage.post = JSON.stringify(post)
+                },
+                getNewPost: function(){
+                    if(!sessionStorage.post)
+                    {
+                        return null;
+                    }
+                    return JSON.parse(sessionStorage.post)
                 },
                 addFavorite: function(post){
                     if(post == null)
@@ -139,6 +149,11 @@
             controller : 'livePostController'
         })
 
+        .when('/previewPost', {
+            templateUrl : 'static/partials/previewPost.html',
+            controller : 'previewPostController'
+        })
+
         .when('/favorites', {
             templateUrl : 'static/partials/favorites.html',
             controller : 'favoritesController'
@@ -195,41 +210,50 @@
     });
 
     // Create Post Controller
-    projectX.controller('createPostController', function($scope, $location, $http, $window){
+    projectX.controller('createPostController', function($scope, $location, $window, sessionCache){
 
         var reader = new FileReader();
         $scope.allFiles = [];
 
-        reader.onload = function(){
+        $scope.init = function(){
+            $scope.post = sessionCache.getNewPost();
+            $scope.allFiles = $scope.post.photos;
+        };
+
+        $scope.init();
+
+        reader.onload = function()
+        {
             $scope.droppedFile[0].url = reader.result;
             $scope.allFiles.push($scope.droppedFile[0]);
+            $scope.post.photos = $scope.allFiles;
             $scope.$apply();
         };
 
         $scope.$watch('droppedFile', function(){
-            if($scope.droppedFile && $scope.droppedFile.length > 0){
+            if($scope.droppedFile && $scope.droppedFile.length > 0)
+            {
                 reader.readAsDataURL($scope.droppedFile[0]);
             }
         });
 
-        $scope.upload = function(files){
-            if($scope.allFiles && $scope.allFiles.length > 0)
+        $scope.onPreview = function(){
+            // TODO: Properly Verify Inputs
+            if(!$scope.post.title || !$scope.post.location || !$scope.post.price ||
+               !$scope.post.description || !$scope.post.email)
             {
-                //alert(JSON.stringify(allFiles));
+                bootbox.alert("One or more required fields are empty.");
+                return;
             }
-            $scope.post.photos = $scope.allFiles;
-            var json = JSON.stringify($scope.post);
-            $http({
-                url:'/upload',
-                method:'POST',
-                dataType: 'JSON',
-                data: json,
-                headers: {'Content-Type': 'application/json'}
-            })
-            .success(function(data, status, headers, config) 
+
+            // TODO: Properly Verify Photos
+            if($scope.post.photos.length < 1)
             {
-            })
-            .error(function(data, status, headers, config) {});
+                bootbox.alert("You must upload at least one image.");
+            }
+
+            sessionCache.setNewPost($scope.post);
+            $location.path('/previewPost');
         };
 
         $scope.onCancel = function(){
@@ -265,6 +289,7 @@
     // Live/Active Post Controller
     projectX.controller('livePostController', function($scope, $window, sessionCache) {
         $scope.init = function(){
+            $('html,body').scrollTop(0);
             $scope.post = sessionCache.getLivePost();
             var slides = $scope.post.Photos;
             $scope.addSlide = function(){
@@ -287,6 +312,37 @@
             sessionCache.addFavorite($scope.post);
             $scope.isFavBtnDisabled = true;
             $scope.favBtnText = "Favorited!"
+        };
+    });
+
+    // Preview Controller
+    projectX.controller('previewPostController', function($scope, $location, $http, sessionCache) {
+        $scope.init = function() {
+            $scope.post = sessionCache.getNewPost();
+        };
+
+        $scope.init();
+
+        $scope.onSubmit = function() {
+            var json = JSON.stringify($scope.post);
+            $http({
+                url:'/upload',
+                method:'POST',
+                dataType: 'JSON',
+                data: json,
+                headers: {'Content-Type': 'application/json'}
+            })
+            .success(function(data, status, headers, config) 
+            {
+                console.info(data, status, headers, config);
+            })
+            .error(function(data, status, headers, config) {
+                console.error(data, status, headers, config);
+            });
+        };
+
+        $scope.onBack = function() {
+            $location.path("/createPost");
         };
     });
 

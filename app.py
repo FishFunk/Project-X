@@ -30,7 +30,7 @@ def upload():
 	email = reqJson.get('email')
 	price = reqJson.get('price')
 	loc = reqJson.get('location')
-	phone = "Implement Phone"
+	phone = reqJson.get('phone')
 
 	# Create Unique Identifier
 	guid = uuid.uuid4()

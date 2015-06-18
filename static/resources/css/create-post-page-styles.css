@@ -26,3 +26,7 @@
 .drop-box.dragover-err {
 	border: 5px dashed red;
 }
+
+input {
+	color:black !important;
+}
