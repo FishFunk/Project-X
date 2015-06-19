@@ -1,7 +1,7 @@
 // script.js
 
     // Create the app module
-    var projectX = angular.module('projectX', ['ngRoute','angularFileUpload', 'ui.bootstrap', 'sprintf']);
+    var projectX = angular.module('projectX', ['ngRoute', 'ui.bootstrap', 'sprintf']);
 
     // Database service
     projectX.factory('dbService', function ($http){
@@ -33,8 +33,9 @@
     // Session cache service
     projectX.factory('sessionCache', function(){
         
-        if(typeof(Storage) !== "undefined")
-        {
+        var newPost = {};
+        //if(typeof(Storage) !== "undefined")
+        //{
             return {
                 setSearchResults: function(data){
                     sessionStorage.searchResults = JSON.stringify(data);
@@ -57,24 +58,26 @@
                     return sessionStorage.searchText;
                 },
                 setLivePost: function(post){
-                    sessionStorage.post = JSON.stringify(post)
+                    sessionStorage.post = JSON.stringify(post);
                 },
                 getLivePost: function(){
                     if(!sessionStorage.post)
                     {
                         return null;
                     }
-                    return JSON.parse(sessionStorage.post)
+                    return JSON.parse(sessionStorage.post);
                 },
                 setNewPost: function(post){
-                    sessionStorage.post = JSON.stringify(post)
+                    //sessionStorage.post = JSON.stringify(post);
+                    newPost = post;
                 },
                 getNewPost: function(){
-                    if(!sessionStorage.post)
-                    {
-                        return null;
-                    }
-                    return JSON.parse(sessionStorage.post)
+                    // if(!sessionStorage.post)
+                    // {
+                    //     return null;
+                    // }
+                    // return JSON.parse(sessionStorage.post);
+                    return newPost;
                 },
                 addFavorite: function(post){
                     if(post == null)
@@ -99,12 +102,12 @@
                     return JSON.parse(sessionStorage.favorites);
                 }
             };
-        }
-        else
-        {
-            alert("Bummer! This browser does not \
-                support features this app requires!");
-        }
+        // }
+        // else
+        // {
+        //     alert("Bummer! This browser does not \
+        //         support features this app requires!");
+        // }
     });
 
     // Enter action directive
@@ -228,25 +231,26 @@
 
         $scope.init = function(){
             $scope.post = sessionCache.getNewPost();
-            $scope.allFiles = ($scope.post != null) ? $scope.post.photos : [];
+            $scope.allFiles = ($scope.post && $scope.post.photos) ? $scope.post.photos : [];
         };
 
         $scope.init();
 
         reader.onload = function()
         {
-            $scope.droppedFile[0].url = reader.result;
-            $scope.allFiles.push($scope.droppedFile[0]);
-            $scope.post.photos = $scope.allFiles;
+            $scope.droppedFile.url = reader.result;
+            $scope.allFiles.push($scope.droppedFile);
             $scope.$apply();
         };
 
-        $scope.$watch('droppedFile', function(){
-            if($scope.droppedFile && $scope.droppedFile.length > 0)
-            {
-                reader.readAsDataURL($scope.droppedFile[0]);
-            }
-        });
+        $scope.onSelectFile = function() {
+            $("input#file-input").click();
+        };
+
+        $scope.onFileSelected = function(files) {
+            $scope.droppedFile = files[0];
+            reader.readAsDataURL(files[0]);
+        };
 
         $scope.onPreview = function(){
             if(!$scope.post)
@@ -291,18 +295,19 @@
                 $("input#email").addClass("bad-input");
                 message+=sprintf("%s. Please enter a valid email address.<BR>", problemCount);
             }
-            if(!$scope.post.photos || $scope.post.photos.length < 1)
+            if(!$scope.allFiles || $scope.allFiles.length < 1)
             {
                 problemCount++;
                 message+=sprintf("%s. We require that you upload at least one relevant image for your ad.<BR>", problemCount);
             }
-            
+
             if(problemCount > 0)
             {
                 bootbox.alert(message);
                 return;
             }
 
+            $scope.post.photos = $scope.allFiles;
             sessionCache.setNewPost($scope.post);
             $location.path('/previewPost');
         };
