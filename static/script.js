@@ -392,7 +392,8 @@
             {
                 console.info(data, status, headers, config);
             })
-            .error(function(data, status, headers, config) {
+            .error(function(data, status, headers, config) 
+            {
                 console.error(data, status, headers, config);
             });
         };
@@ -406,6 +407,11 @@
     projectX.controller('favoritesController', function($scope, $location, $window, sessionCache) {
         $scope.init = function(){
             $scope.favorites = sessionCache.getFavorites();
+            if($scope.favorites.length == 0)
+            {
+                bootbox.alert("You don't have any favorites yet!");
+                $window.history.back();
+            }
         };
 
         $scope.init();
