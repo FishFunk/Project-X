@@ -184,10 +184,7 @@
 
     // Main/Home Page Controller
     projectX.controller('mainController', function($scope, $location, $http, dbService, sessionCache) {
-
-        $scope.header = "";
-        $scope.searchField = "";
-
+        
         generateGreeting = function(){
             var msgs = [
                 "Ahoy Matey!",
@@ -200,6 +197,13 @@
 
             $scope.header = _.sample(msgs);
         };
+
+        $scope.init = function(){
+            $("#post-nav-btn").show();
+            generateGreeting();
+        };
+
+        $scope.init();
 
         $scope.search = function() {
             sessionCache.setSearchText($scope.searchField);
@@ -218,10 +222,10 @@
                 }
             })
             .error(function(data, status, headers, config)
-            {});
+            {
+                console.error(data, status, headers, config);
+            });
         }
-
-        generateGreeting();
     });
 
     // Create Post Controller
@@ -232,6 +236,10 @@
         $scope.init = function(){
             $scope.post = sessionCache.getNewPost();
             $scope.allFiles = ($scope.post && $scope.post.photos) ? $scope.post.photos : [];
+            $(".form-control").on("focus", function(){
+                $(this).removeClass("bad-input");
+            });
+            $("#post-nav-btn").hide();
         };
 
         $scope.init();
@@ -255,13 +263,12 @@
         $scope.onPreview = function(){
             if(!$scope.post)
             {
-                $("input").addClass("bad-input");
-                $("textarea").addClass("bad-input");
+                $("form-control").addClass("bad-input");
                 return;
             }
 
-            $("input").removeClass("bad-input");
-            $("textarea").removeClass("bad-input");
+            $("form-control").removeClass("bad-input");
+
             var problemCount = 0;
             var message = "Oh no! There are some problems with your post.<BR><BR>"
             // TODO: Properly Verify Inputs
@@ -330,6 +337,7 @@
             $scope.results = sessionCache.getSearchResults();
             $('.selectpicker').selectpicker();
             $scope.resultsMsg = sprintf("Good news! We found %s listings for", $scope.results.length);
+            $("#post-nav-btn").show();
         };
 
         $scope.init();
@@ -356,6 +364,7 @@
                     { return p.Guid == $scope.post.Guid }) != null;
             
             $scope.favBtnText = ($scope.isFavBtnDisabled) ? "Favorited!" : "Add to Favorites";
+            $("#post-nav-btn").show();
         };
 
         $scope.init();
@@ -375,6 +384,7 @@
     projectX.controller('previewPostController', function($scope, $location, $http, sessionCache) {
         $scope.init = function() {
             $scope.post = sessionCache.getNewPost();
+            $("#post-nav-btn").hide();
         };
 
         $scope.init();
@@ -412,6 +422,7 @@
                 bootbox.alert("You don't have any favorites yet!");
                 $window.history.back();
             }
+            $("#post-nav-btn").show();
         };
 
         $scope.init();
@@ -424,10 +435,12 @@
 
     // About Page Controller
     projectX.controller('aboutController', function($scope) {
+        $("#post-nav-btn").show();
         $scope.message = 'I am an about page!';
     });
 
     // Contact Page Controller
     projectX.controller('contactController', function($scope) {
+        $("#post-nav-btn").show();
         $scope.message = 'We love to hear your feedback.';
     });
