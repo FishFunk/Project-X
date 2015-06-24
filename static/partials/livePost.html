@@ -21,15 +21,8 @@
     </div>
     <div class="col-xs-12 col-sm-6">
       <carousel style="height: 305px">
-        <slide active="slide.active">
-          <img src="static/resources/img/placeholder.jpeg" style="margin:auto; height:300px;">
-          <div class="carousel-caption">
-          </div>
-        </slide>
-        <slide>
-          <img src="static/resources/img/placeholder.jpeg" style="margin:auto; height:300px">
-          <div class="carousel-caption">
-          </div>
+        <slide ng-repeat="url in post.Photos">
+          <img class="carousel-img" ng-src="{{url}}">
         </slide>
       </carousel>
     </div><!--images-->

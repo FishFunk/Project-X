@@ -30,12 +30,35 @@ class dbService(object):
 
 			posts = list()
 			for row in rows:
-				post = Post(row[1],row[2],row[3],row[4],row[5],row[6],row[7])
-				posts.append(post.getDict())
-				print posts
+				post = Post(row[1],row[2],row[3],row[4],row[5],row[6],row[7]).getDict()
+				post['Photos'] = self.getPhotos(post['Guid'])
+				posts.append(post)
 
 			print "Found %s posts" % len(posts)
 			return posts
+		except mdb.Error, e:
+			print "Error %d: %s" % (e.args[0], e.args[1])
+		finally:
+			cur.close()
+
+	def getPhotos(self, guid):
+		"""
+		Query the database and return results that match the guid.
+		@param - str
+		@return - list<string>
+		"""
+		try:
+			cur = self.con.cursor()
+			sql = """SELECT * FROM PHOTO_URL WHERE GUID = %s"""
+			cur.execute(sql, (guid,))
+			rows = cur.fetchall()
+
+			photoUrls = list()
+			for row in rows:
+				photoUrls.append(row[2])
+
+			print "Found %s photos" % len(photoUrls)
+			return photoUrls
 		except mdb.Error, e:
 			print "Error %d: %s" % (e.args[0], e.args[1])
 		finally:

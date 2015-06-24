@@ -30,7 +30,7 @@
       <ul class="list-inline">
         <li ng-repeat="post in results">
           <div id="post" class="post" ng-click="onLoadPost(post)">
-            <img src="static/resources/img/placeholder.jpeg"></img>
+            <img class="results-img img-responsive img-thumbnail" ng-src="{{post.Photos[0]}}"></img>
             <h4>{{post.Title}}</h4>
             <h5>${{post.Price}}</h5>
           </div>

@@ -18,7 +18,7 @@
         };
     });
 
-    projectX.factory('utils', function(){
+    projectX.factory('utils', function($http){
         return {
             isNumeric: function(value){
                 return !isNaN(parseFloat(value)) && isFinite(value);
@@ -26,6 +26,19 @@
             isValidEmail: function(email){
                 var pattern = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
                 return pattern.test(email);
+            },
+            getLocation: function(){
+                window.navigator.geolocation.getCurrentPosition(function(pos){
+                  console.log(pos);
+                  $http.get('http://maps.googleapis.com/maps/api/geocode/json?latlng='+pos.coords.latitude+','+pos.coords.longitude+'&sensor=true')
+                  .then(function(res){
+                    console.log(res.data);
+                  });
+                })
+            },
+            isBrowserCompatible: function(){
+                return (typeof(Storage) !== "undefined" && 
+                        typeof(navigator.geolocation) !== "undefined");
             }
         };
     });
@@ -34,80 +47,73 @@
     projectX.factory('sessionCache', function(){
         
         var newPost = {};
-        //if(typeof(Storage) !== "undefined")
-        //{
-            return {
-                setSearchResults: function(data){
-                    sessionStorage.searchResults = JSON.stringify(data);
-                },
-                setSearchText: function(value){
-                    sessionStorage.searchText = value;
-                },
-                getSearchResults: function(){
-                    if(!sessionStorage.searchResults)
-                    {
-                        return [];
-                    }
-                    return JSON.parse(sessionStorage.searchResults);
-                },
-                getSearchText: function(){
-                    if(!sessionStorage.searchText)
-                    {
-                        return "";
-                    }
-                    return sessionStorage.searchText;
-                },
-                setLivePost: function(post){
-                    sessionStorage.post = JSON.stringify(post);
-                },
-                getLivePost: function(){
-                    if(!sessionStorage.post)
-                    {
-                        return null;
-                    }
-                    return JSON.parse(sessionStorage.post);
-                },
-                setNewPost: function(post){
-                    //sessionStorage.post = JSON.stringify(post);
-                    newPost = post;
-                },
-                getNewPost: function(){
-                    // if(!sessionStorage.post)
-                    // {
-                    //     return null;
-                    // }
-                    // return JSON.parse(sessionStorage.post);
-                    return newPost;
-                },
-                addFavorite: function(post){
-                    if(post == null)
-                    {
-                        return;
-                    }
 
-                    var favorites = (sessionStorage.favorites == null) ? [] : JSON.parse(sessionStorage.favorites);
-                    var addCondition = _.find(favorites, function(p){ return p.Guid == post.Guid }) == null;
-
-                    if(addCondition)
-                    {
-                        favorites.push(post);
-                        sessionStorage.favorites = JSON.stringify(favorites);
-                    }
-                },
-                getFavorites: function(){
-                    if(!sessionStorage.favorites)
-                    {
-                        return [];
-                    }
-                    return JSON.parse(sessionStorage.favorites);
+        return {
+            setSearchResults: function(data){
+                sessionStorage.searchResults = JSON.stringify(data);
+            },
+            setSearchText: function(value){
+                sessionStorage.searchText = value;
+            },
+            getSearchResults: function(){
+                if(!sessionStorage.searchResults)
+                {
+                    return [];
                 }
-            };
-        // }
-        // else
-        // {
-        //     alert("Bummer! This browser does not \
-        //         support features this app requires!");
-        // }
+                return JSON.parse(sessionStorage.searchResults);
+            },
+            getSearchText: function(){
+                if(!sessionStorage.searchText)
+                {
+                    return "";
+                }
+                return sessionStorage.searchText;
+            },
+            setLivePost: function(post){
+                sessionStorage.post = JSON.stringify(post);
+            },
+            getLivePost: function(){
+                if(!sessionStorage.post)
+                {
+                    return null;
+                }
+                return JSON.parse(sessionStorage.post);
+            },
+            setNewPost: function(post){
+                //sessionStorage.post = JSON.stringify(post);
+                newPost = post;
+            },
+            getNewPost: function(){
+                // if(!sessionStorage.post)
+                // {
+                //     return null;
+                // }
+                // return JSON.parse(sessionStorage.post);
+                return newPost;
+            },
+            addFavorite: function(post){
+                if(post == null)
+                {
+                    return;
+                }
+
+                var favorites = (sessionStorage.favorites == null) ? [] : JSON.parse(sessionStorage.favorites);
+                var addCondition = _.find(favorites, function(p){ return p.Guid == post.Guid }) == null;
+
+                if(addCondition)
+                {
+                    favorites.push(post);
+                    sessionStorage.favorites = JSON.stringify(favorites);
+                }
+            },
+            getFavorites: function(){
+                if(!sessionStorage.favorites)
+                {
+                    return [];
+                }
+                return JSON.parse(sessionStorage.favorites);
+            }
+        };
     });
 
     // Enter action directive
@@ -183,7 +189,7 @@
 //*********** Controllers **************//
 
     // Main/Home Page Controller
-    projectX.controller('mainController', function($scope, $location, $http, dbService, sessionCache) {
+    projectX.controller('mainController', function($scope, $location, $http, dbService, sessionCache, utils) {
         
         generateGreeting = function(){
             var msgs = [
@@ -201,6 +207,10 @@
         $scope.init = function(){
             $("#post-nav-btn").show();
             generateGreeting();
+            if(!utils.isBrowserCompatible())
+            {
+                bootbox.alert("Sorry, your browser does not support features that we require.");
+            }
         };
 
         $scope.init();
