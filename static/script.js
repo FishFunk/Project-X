@@ -46,21 +46,24 @@
     // Session cache service
     projectX.factory('sessionCache', function(){
         
-        var newPost = {};
+        var newPost;
+        var livePost;
+        var searchResults = [];
+        var favorites = [];
 
         return {
             setSearchResults: function(data){
-                sessionStorage.searchResults = JSON.stringify(data);
+                searchResults = data;
             },
             setSearchText: function(value){
                 sessionStorage.searchText = value;
             },
             getSearchResults: function(){
-                if(!sessionStorage.searchResults)
+                if(!searchResults)
                 {
                     return [];
                 }
-                return JSON.parse(sessionStorage.searchResults);
+                return searchResults;
             },
             getSearchText: function(){
                 if(!sessionStorage.searchText)
@@ -70,25 +73,23 @@
                 return sessionStorage.searchText;
             },
             setLivePost: function(post){
-                sessionStorage.post = JSON.stringify(post);
+                livePost = post;
             },
             getLivePost: function(){
-                if(!sessionStorage.post)
+                if(!livePost)
                 {
                     return null;
                 }
-                return JSON.parse(sessionStorage.post);
+                return livePost;
             },
             setNewPost: function(post){
-                //sessionStorage.post = JSON.stringify(post);
                 newPost = post;
             },
             getNewPost: function(){
-                // if(!sessionStorage.post)
-                // {
-                //     return null;
-                // }
-                // return JSON.parse(sessionStorage.post);
+                if(!newPost)
+                {
+                    return null;
+                }
                 return newPost;
             },
             addFavorite: function(post){
@@ -97,21 +98,19 @@
                     return;
                 }
 
-                var favorites = (sessionStorage.favorites == null) ? [] : JSON.parse(sessionStorage.favorites);
-                var addCondition = _.find(favorites, function(p){ return p.Guid == post.Guid }) == null;
+                var addCondition = _.find(favorites, function(p){ return p.guid == post.guid }) == null;
 
                 if(addCondition)
                 {
                     favorites.push(post);
-                    sessionStorage.favorites = JSON.stringify(favorites);
                 }
             },
             getFavorites: function(){
-                if(!sessionStorage.favorites)
+                if(!favorites)
                 {
                     return [];
                 }
-                return JSON.parse(sessionStorage.favorites);
+                return  favorites;
             }
         };
     });
@@ -242,10 +241,12 @@
     projectX.controller('createPostController', function($scope, $location, $window, sessionCache, utils){
 
         var reader = new FileReader();
+        var dropperFile = {};
 
         $scope.init = function(){
-            $scope.post = sessionCache.getNewPost();
-            $scope.allFiles = ($scope.post && $scope.post.photos) ? $scope.post.photos : [];
+            var newPost = sessionCache.getNewPost();
+            $scope.post = (newPost) ? newPost : {};
+            $scope.post.photos = ($scope.post.photos) ? $scope.post.photos : [];
             $(".form-control").on("focus", function(){
                 $(this).removeClass("bad-input");
             });
@@ -256,8 +257,8 @@
 
         reader.onload = function()
         {
-            $scope.droppedFile.url = reader.result;
-            $scope.allFiles.push($scope.droppedFile);
+            droppedFile.url = reader.result;
+            $scope.post.photos.push(droppedFile);
             $scope.$apply();
         };
 
@@ -266,7 +267,7 @@
         };
 
         $scope.onFileSelected = function(files) {
-            $scope.droppedFile = files[0];
+            droppedFile = files[0];
             reader.readAsDataURL(files[0]);
         };
 
@@ -312,7 +313,7 @@
                 $("input#email").addClass("bad-input");
                 message+=sprintf("%s. Please enter a valid email address.<BR>", problemCount);
             }
-            if(!$scope.allFiles || $scope.allFiles.length < 1)
+            if(!$scope.post.photos || $scope.post.photos.length < 1)
             {
                 problemCount++;
                 message+=sprintf("%s. We require that you upload at least one relevant image for your ad.<BR>", problemCount);
@@ -324,7 +325,6 @@
                 return;
             }
 
-            $scope.post.photos = $scope.allFiles;
             sessionCache.setNewPost($scope.post);
             $location.path('/previewPost');
         };
@@ -365,13 +365,13 @@
         $scope.init = function(){
             $('html,body').scrollTop(0);
             $scope.post = sessionCache.getLivePost();
-            var slides = $scope.post.Photos;
+            var slides = $scope.post.photos;
             $scope.addSlide = function(){
                 // Populate slides here
             };
 
             $scope.isFavBtnDisabled = _.find(sessionCache.getFavorites(), function(p)
-                    { return p.Guid == $scope.post.Guid }) != null;
+                    { return p.guid == $scope.post.guid }) != null;
             
             $scope.favBtnText = ($scope.isFavBtnDisabled) ? "Favorited!" : "Add to Favorites";
             $("#post-nav-btn").show();
@@ -392,14 +392,23 @@
 
     // Preview Controller
     projectX.controller('previewPostController', function($scope, $location, $http, sessionCache) {
+
         $scope.init = function() {
             $scope.post = sessionCache.getNewPost();
+            if(!$scope.post)
+            {
+                $location.path("/");
+            }
             $("#post-nav-btn").hide();
         };
 
         $scope.init();
 
         $scope.onSubmit = function() {
+            _.each($scope.post.photos, function(p){
+                p.base64 = p.url.replace("data:image/jpeg;base64,", "");
+                //p.url = null;
+            });
             var json = JSON.stringify($scope.post);
             $http({
                 url:'/upload',
@@ -410,7 +419,10 @@
             })
             .success(function(data, status, headers, config) 
             {
+                bootbox.alert("Woohoo! Your post has been added. Check your email for confirmation.");
                 console.info(data, status, headers, config);
+                sessionCache.setNewPost(null);
+                $location.path("/");
             })
             .error(function(data, status, headers, config) 
             {

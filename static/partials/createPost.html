@@ -32,8 +32,8 @@
         <button class="btn btn-lg btn-default" ng-click="onSelectFile()">Select Image</button>
         <input id="file-input" type="file" accept="image/*" ng-model="image" onchange="angular.element(this).scope().onFileSelected(this.files)">
         <ul id="small-img-list" class="list-inline">
-          <li ng-repeat="file in allFiles">
-            <img ng-src="{{file.url}}" class="img-thumbnail" width="150" height="150"></img>
+          <li ng-repeat="photo in post.photos">
+            <img ng-src="{{photo.url}}" class="img-thumbnail" width="150" height="150"></img>
           </li>
         </ul>
       </div>
