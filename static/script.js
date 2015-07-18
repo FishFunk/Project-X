@@ -1,7 +1,7 @@
 // script.js
 
     // Create the app module
-    var projectX = angular.module('projectX', ['ngRoute','angularFileUpload', 'ui.bootstrap', 'sprintf']);
+    var projectX = angular.module('projectX', ['ngRoute', 'ui.bootstrap', 'sprintf']);
 
     // Database service
     projectX.factory('dbService', function ($http){
@@ -18,7 +18,7 @@
         };
     });
 
-    projectX.factory('utils', function(){
+    projectX.factory('utils', function($http){
         return {
             isNumeric: function(value){
                 return !isNaN(parseFloat(value)) && isFinite(value);
@@ -26,55 +26,73 @@
             isValidEmail: function(email){
                 var pattern = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
                 return pattern.test(email);
+            },
+            getLocation: function(){
+                window.navigator.geolocation.getCurrentPosition(function(pos){
+                  console.log(pos);
+                  $http.get('http://maps.googleapis.com/maps/api/geocode/json?latlng='+pos.coords.latitude+','+pos.coords.longitude+'&sensor=true')
+                  .then(function(res){
+                    console.log(res.data);
+                  });
+                })
+            },
+            isBrowserCompatible: function(){
+                return (typeof(Storage) !== "undefined" && 
+                        typeof(navigator.geolocation) !== "undefined");
             }
         };
     });
 
     // Session cache service
-    projectX.factory('sessionCache', function(){
+    projectX.factory('sessionCache', function(utils){
         
-        if(typeof(Storage) !== "undefined")
+        if(!utils.isBrowserCompatible())
         {
+            bootbox.alert("Sorry, your browser does not support features our app needs!");
+            return;
+        }
+        else
+        {
+            var newPostPhotos;
+
             return {
-                setSearchResults: function(data){
-                    sessionStorage.searchResults = JSON.stringify(data);
-                },
                 setSearchText: function(value){
                     sessionStorage.searchText = value;
                 },
-                getSearchResults: function(){
-                    if(!sessionStorage.searchResults)
-                    {
-                        return [];
-                    }
-                    return JSON.parse(sessionStorage.searchResults);
-                },
                 getSearchText: function(){
-                    if(!sessionStorage.searchText)
-                    {
-                        return "";
-                    }
-                    return sessionStorage.searchText;
+                    return sessionStorage.searchText ? sessionStorage.searchText : "";
+                },
+                setSearchResults: function(data){
+                    sessionStorage.searchResults = JSON.stringify(data);
+                },
+                getSearchResults: function(){
+                    return sessionStorage.searchResults ? JSON.parse(sessionStorage.searchResults) : [];
                 },
                 setLivePost: function(post){
-                    sessionStorage.post = JSON.stringify(post)
+                    sessionStorage.livePost = JSON.stringify(post);
                 },
                 getLivePost: function(){
-                    if(!sessionStorage.post)
-                    {
-                        return null;
-                    }
-                    return JSON.parse(sessionStorage.post)
+                    return sessionStorage.livePost ? JSON.parse(sessionStorage.livePost) : null;
                 },
                 setNewPost: function(post){
-                    sessionStorage.post = JSON.stringify(post)
+                    if(!post)
+                    {
+                        sessionStorage.removeItem("newPost");
+                        return;
+                    }
+                    newPostPhotos = post.photos ? post.photos : [];
+                    post.photos = null;
+                    sessionStorage.newPost = JSON.stringify(post);
                 },
                 getNewPost: function(){
-                    if(!sessionStorage.post)
+                    if(!sessionStorage.newPost)
                     {
                         return null;
                     }
-                    return JSON.parse(sessionStorage.post)
+
+                    var post = JSON.parse(sessionStorage.newPost);
+                    post.photos = newPostPhotos ? newPostPhotos : [];
+                    return post;
                 },
                 addFavorite: function(post){
                     if(post == null)
@@ -82,8 +100,8 @@
                         return;
                     }
 
-                    var favorites = (sessionStorage.favorites == null) ? [] : JSON.parse(sessionStorage.favorites);
-                    var addCondition = _.find(favorites, function(p){ return p.Guid == post.Guid }) == null;
+                    favorites = sessionStorage.favorites ? JSON.parse(favorites) : [];
+                    var addCondition = _.find(favorites, function(p){ return p.guid == post.guid }) == null;
 
                     if(addCondition)
                     {
@@ -92,18 +110,9 @@
                     }
                 },
                 getFavorites: function(){
-                    if(!sessionStorage.favorites)
-                    {
-                        return [];
-                    }
-                    return JSON.parse(sessionStorage.favorites);
+                    return  sessionStorage.favorites ? JSON.parse(sessionStorage.favorites) : [];
                 }
-            };
-        }
-        else
-        {
-            alert("Bummer! This browser does not \
-                support features this app requires!");
+            }
         }
     });
 
@@ -180,11 +189,8 @@
 //*********** Controllers **************//
 
     // Main/Home Page Controller
-    projectX.controller('mainController', function($scope, $location, $http, dbService, sessionCache) {
-
-        $scope.header = "";
-        $scope.searchField = "";
-
+    projectX.controller('mainController', function($scope, $location, $http, dbService, sessionCache, utils) {
+        
         generateGreeting = function(){
             var msgs = [
                 "Ahoy Matey!",
@@ -197,6 +203,17 @@
 
             $scope.header = _.sample(msgs);
         };
+
+        $scope.init = function(){
+            $("#post-nav-btn").show();
+            generateGreeting();
+            if(!utils.isBrowserCompatible())
+            {
+                bootbox.alert("Sorry, your browser does not support features that we require.");
+            }
+        };
+
+        $scope.init();
 
         $scope.search = function() {
             sessionCache.setSearchText($scope.searchField);
@@ -215,49 +232,72 @@
                 }
             })
             .error(function(data, status, headers, config)
-            {});
+            {
+                console.error(data, status, headers, config);
+            });
         }
-
-        generateGreeting();
     });
 
     // Create Post Controller
     projectX.controller('createPostController', function($scope, $location, $window, sessionCache, utils){
 
         var reader = new FileReader();
+        var dropperFile = {};
 
         $scope.init = function(){
-            $scope.post = sessionCache.getNewPost();
-            $scope.allFiles = ($scope.post != null) ? $scope.post.photos : [];
+            var newPost = sessionCache.getNewPost();
+            $scope.post = (newPost) ? newPost : {};
+            $scope.post.photos = ($scope.post.photos) ? $scope.post.photos : [];
+            $(".form-control").on("focus", function(){
+                $(this).removeClass("bad-input");
+            });
+            $("#post-nav-btn").hide();
         };
 
         $scope.init();
 
         reader.onload = function()
         {
-            $scope.droppedFile[0].url = reader.result;
-            $scope.allFiles.push($scope.droppedFile[0]);
-            $scope.post.photos = $scope.allFiles;
+            droppedFile.url = reader.result;
+            if($scope.post.photos.length == 0)
+            {
+                droppedFile.isMain = true;
+            }
+            $scope.post.photos.push(droppedFile);
             $scope.$apply();
         };
 
-        $scope.$watch('droppedFile', function(){
-            if($scope.droppedFile && $scope.droppedFile.length > 0)
+        $scope.onSelectFile = function() {
+            $("input#file-input").click();
+        };
+
+        $scope.onFileSelected = function(files) {
+            droppedFile = files[0];
+            reader.readAsDataURL(files[0]);
+        };
+
+        $scope.onStarPhoto = function(photo) {
+            _.each($scope.post.photos, function(p){p.isMain = false});
+            photo.isMain = true;
+        };
+
+        $scope.onDeletePhoto = function(photo) {
+            $scope.post.photos = _.reject($scope.post.photos, function(p){return p == photo});
+            if($scope.post.photos.length == 1)
             {
-                reader.readAsDataURL($scope.droppedFile[0]);
+                $scope.post.photos[0].isMain = true;
             }
-        });
+        };
 
         $scope.onPreview = function(){
             if(!$scope.post)
             {
-                $("input").addClass("bad-input");
-                $("textarea").addClass("bad-input");
+                $("form-control").addClass("bad-input");
                 return;
             }
 
-            $("input").removeClass("bad-input");
-            $("textarea").removeClass("bad-input");
+            $("form-control").removeClass("bad-input");
+
             var problemCount = 0;
             var message = "Oh no! There are some problems with your post.<BR><BR>"
             // TODO: Properly Verify Inputs
@@ -296,7 +336,7 @@
                 problemCount++;
                 message+=sprintf("%s. We require that you upload at least one relevant image for your ad.<BR>", problemCount);
             }
-            
+
             if(problemCount > 0)
             {
                 bootbox.alert(message);
@@ -308,12 +348,25 @@
         };
 
         $scope.onCancel = function(){
-            bootbox.confirm("Are you sure you want to cancel? Any information you've entered will be lost.", 
-                function(confirm){
-                    if(confirm)
-                    {
-                        $window.history.back();
-                    }
+            bootbox.dialog({
+              message: "Any information you've entered will be lost.",
+              title: "Are you sure you want to cancel?",
+              buttons: {
+                danger: {
+                  label: "Nevermind!",
+                  className: "btn-danger",
+                  callback: function(){}
+                },
+                main: {
+                  label: "Duh, I know what I'm doing.",
+                  className: "btn-primary",
+                  callback: function() {
+                    sessionCache.setNewPost(null);
+                    $location.path("/");
+                    $scope.$apply();
+                  }
+                }
+              }
             });
         };
     });
@@ -325,6 +378,7 @@
             $scope.results = sessionCache.getSearchResults();
             $('.selectpicker').selectpicker();
             $scope.resultsMsg = sprintf("Good news! We found %s listings for", $scope.results.length);
+            $("#post-nav-btn").show();
         };
 
         $scope.init();
@@ -342,15 +396,11 @@
         $scope.init = function(){
             $('html,body').scrollTop(0);
             $scope.post = sessionCache.getLivePost();
-            var slides = $scope.post.Photos;
-            $scope.addSlide = function(){
-                // Populate slides here
-            };
-
             $scope.isFavBtnDisabled = _.find(sessionCache.getFavorites(), function(p)
-                    { return p.Guid == $scope.post.Guid }) != null;
+                    { return p.guid == $scope.post.guid }) != null;
             
             $scope.favBtnText = ($scope.isFavBtnDisabled) ? "Favorited!" : "Add to Favorites";
+            $("#post-nav-btn").show();
         };
 
         $scope.init();
@@ -368,13 +418,21 @@
 
     // Preview Controller
     projectX.controller('previewPostController', function($scope, $location, $http, sessionCache) {
+
         $scope.init = function() {
             $scope.post = sessionCache.getNewPost();
+            $scope.post.photos = [_.find($scope.post.photos, function(p){return p.isMain})]
+            .concat(_.filter($scope.post.photos, function(p){return !p.isMain}));
+            $("#post-nav-btn").hide();
         };
 
         $scope.init();
 
         $scope.onSubmit = function() {
+            _.each($scope.post.photos, function(p){
+                p.base64 = p.url.replace("data:image/jpeg;base64,", "");
+                //p.url = null;
+            });
             var json = JSON.stringify($scope.post);
             $http({
                 url:'/upload',
@@ -385,9 +443,13 @@
             })
             .success(function(data, status, headers, config) 
             {
+                bootbox.alert("Woohoo! Your post has been added. Check your email for confirmation.");
                 console.info(data, status, headers, config);
+                sessionCache.setNewPost(null);
+                $location.path("/");
             })
-            .error(function(data, status, headers, config) {
+            .error(function(data, status, headers, config) 
+            {
                 console.error(data, status, headers, config);
             });
         };
@@ -401,6 +463,12 @@
     projectX.controller('favoritesController', function($scope, $location, $window, sessionCache) {
         $scope.init = function(){
             $scope.favorites = sessionCache.getFavorites();
+            if($scope.favorites.length == 0)
+            {
+                bootbox.alert("You don't have any favorites yet!");
+                $window.history.back();
+            }
+            $("#post-nav-btn").show();
         };
 
         $scope.init();
@@ -413,10 +481,12 @@
 
     // About Page Controller
     projectX.controller('aboutController', function($scope) {
+        $("#post-nav-btn").show();
         $scope.message = 'I am an about page!';
     });
 
     // Contact Page Controller
     projectX.controller('contactController', function($scope) {
+        $("#post-nav-btn").show();
         $scope.message = 'We love to hear your feedback.';
     });

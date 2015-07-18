@@ -27,24 +27,23 @@
         </div>
       </div><!--#form-panel-->
     </div>
-    <div id="images" class="col-xs-12 col-sm-6">
-      <div ng-file-select ng-file-drop ng-model="droppedFile" ng-model-rejected="rejFiles" ng-accept="accept" accept="image/*" ng-disabled="disabled" ng-capture="capture" drag-over-class="{accept:'dragover', reject:'dragover-err', delay:100}" class="big-drop-box ng-pristine ng-valid" drop-available="dropAvailable">Click to Upload
-      <br><span ng-show="dropAvailable">or Drag/Drop</span>
-      <br><span><i class="fa fa-camera"></i></span>
+    <div class="col-xs-12 col-sm-6">
+      <div id="img-upload-well" class="well well-lg">
+        <button id="add-img-btn" class="btn btn-lg btn-default center-block" ng-click="onSelectFile()">Select Images</button>
+        <p>Select the <i class="fa fa-star fa-2x"></i> to indicate your primary photo. If you change your mind, select the <i class="fa fa-trash-o fa-2x"></i> to delete a photo.</p>
+        <input id="file-input" type="file" accept="image/*" ng-model="image" onchange="angular.element(this).scope().onFileSelected(this.files)">
+        <ul id="small-img-list" class="list-inline">
+          <li ng-repeat="photo in post.photos">
+            <img ng-src="{{photo.url}}" class="img-thumbnail" width="180" height="180"></img>
+            <div class="btn-group-md center-block" role="group">
+            <button type="button" ng-disabled="photo.isMain == true" class="btn btn-default" ng-click="onStarPhoto(photo)"><i ng-class="{'main-photo-icon': photo.isMain}" class="fa fa-star"></i></button>
+            <button type="button" class="btn btn-default" ng-click="onDeletePhoto(photo)"><i class="fa fa-trash-o"></i></button>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </div><!--.row-->
-
-  <div class="row">
-    <div id="img-upload-well" class="well well-lg">
-      <h4>Uploaded Images</h4>
-      <ul id="small-img-list" class="list-inline">
-        <li ng-repeat="file in allFiles">
-          <img ng-src="{{file.url}}" class="img-thumbnail" width="150" height="150"></img>
-        </li>
-      </ul>
-    </div>
-  </div>
 
   <div class="row">
     <div class="center-block">

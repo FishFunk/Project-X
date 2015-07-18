@@ -3,9 +3,12 @@ TestDbBuilder.py
 """
 
 import MySQLdb as mdb, sys
-import uuid
+import uuid, os, shutil
 
 class BuildTestDb(object):
+
+	imgPath = "/Users/Daniel/bin/AppData/ProjectX/Images"
+	placeholderImg = "/Users/Daniel/Desktop/Project X/static/resources/img/placeholder.jpeg"
 
 	def __init__(self, host, user, passwd, dbName):
 		self.host = host
@@ -52,30 +55,31 @@ class BuildTestDb(object):
 			print "Error %d: %s" % (ex.args[0], ex.args[1])
 
 	def addData(self):
+		self.createPost('lawn chair', 'so comfortable!', 'daniel@email.com', 40, 22203, '\N', '2015-03-12')
+		self.createPost('Macbook Pro', 'This thing is a beast. 250 gigs.', 'grant@email.com', 200, 22003, '\N', '2015-03-12')
+		self.createPost('Sofa', 'Confortable! Like new!', 'abc@email.com', 1000, 22003, '\N', '2015-05-12')
+		self.createPost('50" TV', 'Samsung. Crystal clear image.', 'bs@email.com', 1200, 22003, '\N', '2015-04-12')
+		self.createPost('20" HD TV', 'Nice little tv.', 'aa@email.com', 100, 22203, '\N', '2015-03-12')
+		self.createPost('43 inch HDTV', 'Moving, will take best offer.', 'bb@email.com', 500, 22314, '\N', '2015-03-19')
+		self.createPost('Dining Table', 'This thing is an antique. Great condition', 'thatguy@email.com', 600, 23143, '\N', '2015-03-22')
+		self.createPost('Lamp', 'Cheap IKEA lamp.', 'ikea@email.com', 10, 22314, '\N', '2015-03-12')
+		self.createPost('Macbook Pro 2009', 'Old but still works! 150 gigs.', 'mac@email.com', 300, 22003, '\N', '2015-03-12')
+		self.createPost('Macbook Pro 2011', '15" screen. Scratch on the casing but work perfect.', 'hikerdude@email.com', 500, 22314, '\N', '2015-03-12')
+		
+
+	def createPost(self, title, desc, email, price, loc, phone, date):
 		con = mdb.connect(self.host, self.user, self.passwd, self.dbName)
 		cur = con.cursor()
 		guid = uuid.uuid4()
 		sql = "INSERT INTO POST (GUID, TITLE, DESCRIPTION, EMAIL, PRICE, LOCATION, PHONE, DATE_ADDED)\
-		VALUES('%s', 'lawn chair', 'so comfortable!', 'daniel@email.com', 40, 22203, \N, '2015-03-12')" % guid
+		VALUES('%s', '%s', '%s', '%s', %s, %s, %s, '%s')" % (guid, title, desc, email, price, loc, phone, date)
 		cur.execute(sql)
-		guid = uuid.uuid4()
-		sql = "INSERT INTO POST (GUID, TITLE, DESCRIPTION, EMAIL, PRICE, LOCATION, PHONE, DATE_ADDED)\
-		VALUES('%s', 'Macbook Pro', 'This thing is a beast. 250 gigs.', 'grant@email.com', 200, 22003, \N, '2015-03-12')" % guid
-		cur.execute(sql)
-		guid = uuid.uuid4()
-		sql = "INSERT INTO POST (GUID, TITLE, DESCRIPTION, EMAIL, PRICE, LOCATION, PHONE, DATE_ADDED)\
-		VALUES('%s', 'Need a roommate', 'Renovated 1 bed and private bath.', 'rent@email.com', 1500, 22903, '7031129302', '2015-03-12')" % guid
-		cur.execute(sql)
-		guid = uuid.uuid4()
-		sql = "INSERT INTO POST (GUID, TITLE, DESCRIPTION, EMAIL, PRICE, LOCATION, PHONE, DATE_ADDED)\
-		VALUES('%s', 'Desk', 'Made in the 80s. Oak wood. Has a scratch on the side.', 'chris@email.com', 150, 91003, '5713548233', '2015-03-12')" % guid
-		cur.execute(sql)
-		guid = uuid.uuid4()
-		sql = "INSERT INTO POST (GUID, TITLE, DESCRIPTION, EMAIL, PRICE, LOCATION, PHONE, DATE_ADDED)\
-		VALUES('%s', 'Drum kit', 'Basic set for beginners. Throne included.', 'drums@email.com', 500, 23205, \N, '2015-03-12')" % guid
-		cur.execute(sql)
+		fileDir = os.path.join(self.imgPath, str(guid))
+		if not os.path.exists(fileDir):
+			os.makedirs(fileDir)
+		shutil.copyfile(self.placeholderImg, os.path.join(fileDir, 'testPhoto.jpg'))
 		con.commit()
-		con.close()
+		cur.close()
 
 if __name__ == "__main__":
 	builder = BuildTestDb("localhost", "root", "qwerty01", "ProjectX")

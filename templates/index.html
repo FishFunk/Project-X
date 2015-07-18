@@ -11,15 +11,11 @@
       <link rel="stylesheet" href="{{url_for('static', filename='resources/bootstrap-3.2.0/css/ui-bootstrap-csp.css')}}" />
       <link rel="stylesheet" href="{{url_for('static', filename='resources/bootstrap-3.2.0/css/bootstrap-select.min.css')}}" />
       <link rel="stylesheet" href="{{url_for('static', filename='resources/font-awesome-4.3.0/css/font-awesome.min.css')}}" />
-      <link rel="stylesheet" href="{{url_for('static', filename='resources/css/home-page-styles.css')}}" />
-      <link rel="stylesheet" href="{{url_for('static', filename='resources/css/create-post-page-styles.css')}}" />
       <link rel="stylesheet" href="{{url_for('static', filename='resources/css/master.css')}}" />
-      <link rel="stylesheet" href="{{url_for('static', filename='resources/css/results-page.css')}}" />
       <!-- SPELLS -->
       <script src="{{url_for('static', filename='resources/jquery-2.1.3.min.js')}}"></script>
       <script src="{{url_for('static', filename='resources/angular.min.js')}}"></script>
       <script src="{{url_for('static', filename='resources/angular-route.min.js')}}"></script>
-      <script src="{{url_for('static', filename='resources/angular-file-upload-all.min.js')}}"></script>
       <script src="{{url_for('static', filename='resources/bootstrap-3.2.0/js/bootstrap.min.js')}}"></script>
       <script src="{{url_for('static', filename='resources/bootstrap-3.2.0/js/ui-bootstrap-0.13.0.min.js')}}"></script>
       <script src="{{url_for('static', filename='resources/bootstrap-3.2.0/js/ui-bootstrap-tpls.min.js')}}"></script>
@@ -44,8 +40,8 @@
                 </div>
                 <div class="collapse navbar-collapse navHeaderCollapse">
                   <ul id="nav-list" class="nav navbar-nav navbar-right center-block">
-                      <li><a href="#createPost"><i class="fa fa-plus"></i> Post</a></li>
-                      <li><a href="#favorites"><i class="fa fa-star"></i> Favs</a></li>
+                      <li><a id="post-nav-btn" href="#createPost"><i class="fa fa-plus"></i>&nbsp;Post</a></li>
+                      <li><a id="favs-nav-btn" href="#favorites"><i class="fa fa-star"></i>&nbsp;Favs</a></li>
                       <li class="dropdown">
                         <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                           <i class="fa fa-question"></i>

@@ -3,51 +3,44 @@
     <div class="col-xs-12 col-sm-6">
       <div class="panel panel-default" style="height: 305px">
         <header class="panel-heading">
-          <h4 class="panel-title">{{post.Title}}</h4>
+          <h4 class="panel-title">{{post.title}}</h4>
         </header>
         <div class="panel-body">
             <div>
-              <h4>${{post.Price}}</h4>
-              <p>{{post.Description}}</p>
+              <h4>${{post.price}}</h4>
+              <p>{{post.description}}</p>
             </div>
+            <hr>
             <div>
-              <h6>{{post.Location}}</h6>
-              <h6>{{post.Email}}</h6>
+              <h5>Contact Info</h5>
+              <h6>{{post.location}}</h6>
+              <h6>{{post.email}}</h6>
             </div>
         </div>
       </div>
     </div>
     <div class="col-xs-12 col-sm-6">
       <carousel style="height: 305px">
-        <slide active="slide.active">
-          <img src="static/resources/img/placeholder.jpeg" style="margin:auto; height:300px;">
-          <div class="carousel-caption">
-            <h4>Slide Demo</h4>
-            <p>Description</p>
-          </div>
-        </slide>
-        <slide>
-          <img src="static/resources/img/placeholder.jpeg" style="margin:auto; height:300px">
-          <div class="carousel-caption">
-            <h4>Slide Demo</h4>
-            <p>Description</p>
-          </div>
+        <slide ng-repeat="photo in post.photos">
+          <img class="carousel-img" ng-src="/image_uploads?guid={{post.guid}}&filename={{photo}}">
         </slide>
       </carousel>
     </div><!--images-->
   </div><!--.row-->
-  <div class="center-block">
-    <button class="btn btn-md btn-default" ng-click="onBack()">
-      <i class="fa fa-chevron-left" ></i>
-      Back
-    </button>
-    <button class="btn btn-md btn-success" ng-click="onAddFavorite()" ng-disabled="isFavBtnDisabled == true">
-      <i class="fa fa-star"></i>
-      {{favBtnText}}
-    </button>
-    <button class="btn btn-md btn-danger" ng-click="onFlag()">
-      <i class="fa fa-flag"></i>
-      Flag
-    </button>
+  <div class="row btn-container">
+    <div class="center-block">
+      <button class="btn btn-lg btn-default" ng-click="onBack()">
+        <i class="fa fa-chevron-left" ></i>
+        Back
+      </button>
+      <button class="btn btn-lg btn-success" ng-click="onAddFavorite()" ng-disabled="isFavBtnDisabled == true">
+        <i class="fa fa-star"></i>
+        {{favBtnText}}
+      </button>
+      <button class="btn btn-lg btn-danger" ng-click="onFlag()">
+        <i class="fa fa-flag"></i>
+        Flag
+      </button>
+    </div>
   </div>
 </div><!--container-->

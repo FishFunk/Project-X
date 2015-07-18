@@ -10,6 +10,10 @@ textarea {
     margin: 2px;
 }
 
+#add-img-btn {
+    margin-bottom: 5px;
+}
+
 #main {
     overflow: auto;
     padding-bottom: 150px;
@@ -20,16 +24,6 @@ textarea {
     height: auto;
     margin: 0 auto -60px;
     padding: 0 0 60px;
-}
-
-#global-nav {
-	background-color: purple;
-}
-
-#collapse-button {
-    color: white;
-    height:40px;
-    width:40px;
 }
 
 .center-block {
@@ -43,20 +37,85 @@ textarea {
     display: inline-block;;
 }
 
-.clear{
-    clear:both;
+#search-bar-row {
+    padding:5px;
 }
 
-#home-link {
-	color: white;
+#header-text {
+    text-align: center;
+    color: #999999;
 }
 
-#fav-link {
-    color: white;
-    margin-top: 100px;
+#search-text-field {
+    padding: 5px 9px;
+    height: 60px;
+    min-width: 192px;
+    border: 1px solid #a4c3ca;
+    font: normal 16px 'trebuchet MS', arial, helvetica;
+    background: #f1f1f1;
+    border-radius: 60px 5px 5px 60px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) inset, 0 1px 0 rgba(255, 255, 255, 1);            
 }
 
+#search-button{
+    margin:2px 0 0 1px;
+    border-radius: 5px 60px 60px 5px;
+    height: 60px;
+    width: 60px;
+    border: 1px solid #a4c3ca;
+}
 
-/*----- Footer ------*/
-#footer {
+.carousel-img{
+    margin:auto;
+    max-height:305px;
+}
+
+.results-img{
+    width: 250px;
+}
+
+div.post{
+    padding:5px;
+    cursor: pointer;
+}
+
+div.post:hover{
+    background-color: gray;
+}
+
+.sort-picker {
+    width:100px !important;
+}
+
+.sort-picker > button{
+    width:100px !important;
+}
+
+#small-img-list {
+    list-style-type: none;
+}
+
+#file-input {
+    display: none;
+}
+
+input {
+    color:black !important;
+}
+
+textarea {
+    color:black !important;
+}
+
+.bad-input{
+    border: 2px solid red;
+}
+
+.btn-container{
+    padding:20px;
+}
+
+.main-photo-icon{
+    color:gold;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;;
 }
