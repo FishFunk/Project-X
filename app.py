@@ -57,7 +57,8 @@ def upload():
 
 @app.route('/image_uploads', methods=['GET'])
 def uploaded_file():
-	return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], request.args.get('guid')), request.args.get('filename'))
+	return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], 
+		request.args.get('guid')), request.args.get('filename'))
 
 
 
@@ -68,12 +69,7 @@ def WritePhotos(guid, photos):
 		filename = "%s.jpg" % count
 		utils.WriteBase64FileToPath(path, filename, p['base64'])
 		count+=1
-	# directory = os.path.join(imgPath, str(guid))
-	# count = 0
-	# for p in photos:
-	# 	data = p['base64'].decode("base64")
-	# 	utils.WriteBase64FileToPath(directory, count, data)
 
 if __name__ == "__main__":
 	app.run(port=8080, debug=True)
-	#app.run(host='0.0.0.0') # public on network
+	#app.run(host='0.0.0.0', debug=True) # public on network

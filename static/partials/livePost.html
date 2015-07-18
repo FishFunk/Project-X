@@ -27,18 +27,20 @@
       </carousel>
     </div><!--images-->
   </div><!--.row-->
-  <div class="center-block">
-    <button class="btn btn-md btn-default" ng-click="onBack()">
-      <i class="fa fa-chevron-left" ></i>
-      Back
-    </button>
-    <button class="btn btn-md btn-success" ng-click="onAddFavorite()" ng-disabled="isFavBtnDisabled == true">
-      <i class="fa fa-star"></i>
-      {{favBtnText}}
-    </button>
-    <button class="btn btn-md btn-danger" ng-click="onFlag()">
-      <i class="fa fa-flag"></i>
-      Flag
-    </button>
+  <div class="row btn-container">
+    <div class="center-block">
+      <button class="btn btn-lg btn-default" ng-click="onBack()">
+        <i class="fa fa-chevron-left" ></i>
+        Back
+      </button>
+      <button class="btn btn-lg btn-success" ng-click="onAddFavorite()" ng-disabled="isFavBtnDisabled == true">
+        <i class="fa fa-star"></i>
+        {{favBtnText}}
+      </button>
+      <button class="btn btn-lg btn-danger" ng-click="onFlag()">
+        <i class="fa fa-flag"></i>
+        Flag
+      </button>
+    </div>
   </div>
 </div><!--container-->

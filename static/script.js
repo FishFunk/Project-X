@@ -44,75 +44,76 @@
     });
 
     // Session cache service
-    projectX.factory('sessionCache', function(){
+    projectX.factory('sessionCache', function(utils){
         
-        var newPost;
-        var livePost;
-        var searchResults = [];
-        var favorites = [];
+        if(!utils.isBrowserCompatible())
+        {
+            bootbox.alert("Sorry, your browser does not support features our app needs!");
+            return;
+        }
+        else
+        {
+            var newPostPhotos;
 
-        return {
-            setSearchResults: function(data){
-                searchResults = data;
-            },
-            setSearchText: function(value){
-                sessionStorage.searchText = value;
-            },
-            getSearchResults: function(){
-                if(!searchResults)
-                {
-                    return [];
-                }
-                return searchResults;
-            },
-            getSearchText: function(){
-                if(!sessionStorage.searchText)
-                {
-                    return "";
-                }
-                return sessionStorage.searchText;
-            },
-            setLivePost: function(post){
-                livePost = post;
-            },
-            getLivePost: function(){
-                if(!livePost)
-                {
-                    return null;
-                }
-                return livePost;
-            },
-            setNewPost: function(post){
-                newPost = post;
-            },
-            getNewPost: function(){
-                if(!newPost)
-                {
-                    return null;
-                }
-                return newPost;
-            },
-            addFavorite: function(post){
-                if(post == null)
-                {
-                    return;
-                }
+            return {
+                setSearchText: function(value){
+                    sessionStorage.searchText = value;
+                },
+                getSearchText: function(){
+                    return sessionStorage.searchText ? sessionStorage.searchText : "";
+                },
+                setSearchResults: function(data){
+                    sessionStorage.searchResults = JSON.stringify(data);
+                },
+                getSearchResults: function(){
+                    return sessionStorage.searchResults ? JSON.parse(sessionStorage.searchResults) : [];
+                },
+                setLivePost: function(post){
+                    sessionStorage.livePost = JSON.stringify(post);
+                },
+                getLivePost: function(){
+                    return sessionStorage.livePost ? JSON.parse(sessionStorage.livePost) : null;
+                },
+                setNewPost: function(post){
+                    if(!post)
+                    {
+                        sessionStorage.removeItem("newPost");
+                        return;
+                    }
+                    newPostPhotos = post.photos ? post.photos : [];
+                    post.photos = null;
+                    sessionStorage.newPost = JSON.stringify(post);
+                },
+                getNewPost: function(){
+                    if(!sessionStorage.newPost)
+                    {
+                        return null;
+                    }
 
-                var addCondition = _.find(favorites, function(p){ return p.guid == post.guid }) == null;
+                    var post = JSON.parse(sessionStorage.newPost);
+                    post.photos = newPostPhotos ? newPostPhotos : [];
+                    return post;
+                },
+                addFavorite: function(post){
+                    if(post == null)
+                    {
+                        return;
+                    }
 
-                if(addCondition)
-                {
-                    favorites.push(post);
+                    favorites = sessionStorage.favorites ? JSON.parse(favorites) : [];
+                    var addCondition = _.find(favorites, function(p){ return p.guid == post.guid }) == null;
+
+                    if(addCondition)
+                    {
+                        favorites.push(post);
+                        sessionStorage.favorites = JSON.stringify(favorites);
+                    }
+                },
+                getFavorites: function(){
+                    return  sessionStorage.favorites ? JSON.parse(sessionStorage.favorites) : [];
                 }
-            },
-            getFavorites: function(){
-                if(!favorites)
-                {
-                    return [];
-                }
-                return  favorites;
             }
-        };
+        }
     });
 
     // Enter action directive
@@ -258,6 +259,10 @@
         reader.onload = function()
         {
             droppedFile.url = reader.result;
+            if($scope.post.photos.length == 0)
+            {
+                droppedFile.isMain = true;
+            }
             $scope.post.photos.push(droppedFile);
             $scope.$apply();
         };
@@ -269,6 +274,19 @@
         $scope.onFileSelected = function(files) {
             droppedFile = files[0];
             reader.readAsDataURL(files[0]);
+        };
+
+        $scope.onStarPhoto = function(photo) {
+            _.each($scope.post.photos, function(p){p.isMain = false});
+            photo.isMain = true;
+        };
+
+        $scope.onDeletePhoto = function(photo) {
+            $scope.post.photos = _.reject($scope.post.photos, function(p){return p == photo});
+            if($scope.post.photos.length == 1)
+            {
+                $scope.post.photos[0].isMain = true;
+            }
         };
 
         $scope.onPreview = function(){
@@ -330,12 +348,25 @@
         };
 
         $scope.onCancel = function(){
-            bootbox.confirm("Are you sure you want to cancel? Any information you've entered will be lost.", 
-                function(confirm){
-                    if(confirm)
-                    {
-                        $window.history.back();
-                    }
+            bootbox.dialog({
+              message: "Any information you've entered will be lost.",
+              title: "Are you sure you want to cancel?",
+              buttons: {
+                danger: {
+                  label: "Nevermind!",
+                  className: "btn-danger",
+                  callback: function(){}
+                },
+                main: {
+                  label: "Duh, I know what I'm doing.",
+                  className: "btn-primary",
+                  callback: function() {
+                    sessionCache.setNewPost(null);
+                    $location.path("/");
+                    $scope.$apply();
+                  }
+                }
+              }
             });
         };
     });
@@ -365,11 +396,6 @@
         $scope.init = function(){
             $('html,body').scrollTop(0);
             $scope.post = sessionCache.getLivePost();
-            var slides = $scope.post.photos;
-            $scope.addSlide = function(){
-                // Populate slides here
-            };
-
             $scope.isFavBtnDisabled = _.find(sessionCache.getFavorites(), function(p)
                     { return p.guid == $scope.post.guid }) != null;
             
@@ -395,10 +421,8 @@
 
         $scope.init = function() {
             $scope.post = sessionCache.getNewPost();
-            if(!$scope.post)
-            {
-                $location.path("/");
-            }
+            $scope.post.photos = [_.find($scope.post.photos, function(p){return p.isMain})]
+            .concat(_.filter($scope.post.photos, function(p){return !p.isMain}));
             $("#post-nav-btn").hide();
         };
 
