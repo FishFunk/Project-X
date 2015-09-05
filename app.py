@@ -49,9 +49,9 @@ def upload():
 		dbService.insertPost(post)
 		WritePhotos(guid, photos)
 
-		print "Successfully created post!"
+		print "Successfully created post"
 	except IOError, e:
-		print "DB Service Failure. %s, %s" % (e.args[0], e.args[1])
+		print "DB Service Failure - failed to create post. %s, %s" % (e.args[0], e.args[1])
 
 	return ""
 
@@ -60,6 +60,15 @@ def uploaded_file():
 	return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], 
 		request.args.get('guid')), request.args.get('filename'))
 
+@app.route('/flag_post', methods=['POST'])
+def flag_post():
+	reqJson = request.get_json()
+	guid = reqJson.get('guid')
+	try:
+		dbService.flagPost(guid)
+	except IOError, e:
+		print "DB Service Failure - failed to flag post. %s, %s" % (e.args[0], e.args[1])
+	return "OK"
 
 
 def WritePhotos(guid, photos):

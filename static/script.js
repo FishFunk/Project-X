@@ -100,7 +100,7 @@
                         return;
                     }
 
-                    favorites = sessionStorage.favorites ? JSON.parse(favorites) : [];
+                    var favorites = sessionStorage.favorites ? JSON.parse(sessionStorage.favorites) : [];
                     var addCondition = _.find(favorites, function(p){ return p.guid == post.guid }) == null;
 
                     if(addCondition)
@@ -111,6 +111,20 @@
                 },
                 getFavorites: function(){
                     return  sessionStorage.favorites ? JSON.parse(sessionStorage.favorites) : [];
+                },
+                flagPost: function(guid){
+                    if(!guid)
+                    {
+                        return;
+                    }
+                    var flagged = sessionStorage.flaggedPosts ? JSON.parse(sessionStorage.flaggedPosts) : [];
+                    flagged.push(guid);
+                    sessionStorage.flaggedPosts = JSON.stringify(flagged);
+                },
+                didFlagPost: function(guid){
+                    var flagged = sessionStorage.flaggedPosts ? JSON.parse(sessionStorage.flaggedPosts) : [];
+                    var target = _.find(flagged, function(g){ return g == guid });
+                    return target != null;
                 }
             }
         }
@@ -147,12 +161,6 @@
             controller : 'aboutController'
         })
 
-        // Contact page
-        .when('/contact', {
-            templateUrl : 'static/partials/contact.html',
-            controller : 'contactController'
-        })
-
         // Create page
         .when('/createPost', {
             templateUrl : 'static/partials/createPost.html',
@@ -178,6 +186,16 @@
         .when('/favorites', {
             templateUrl : 'static/partials/favorites.html',
             controller : 'favoritesController'
+        })
+
+        .when('/about', {
+            templateUrl : 'static/partials/about.html',
+            controller : 'aboutController'
+        })
+
+        .when('/tips', {
+            templateUrl : 'static/partials/tips.html',
+            controller : 'tipsController'
         })
 
         // Default to home
@@ -377,7 +395,9 @@
             $scope.searchVal = sessionCache.getSearchText();
             $scope.results = sessionCache.getSearchResults();
             $('.selectpicker').selectpicker();
-            $scope.resultsMsg = sprintf("Good news! We found %s listings for", $scope.results.length);
+            $scope.resultsMsg = sprintf("Good news! We found %s listing%s for", 
+                $scope.results.length,
+                ($scope.results.length > 1 ? "s" : ""));
             $("#post-nav-btn").show();
         };
 
@@ -392,13 +412,13 @@
 
 
     // Live/Active Post Controller
-    projectX.controller('livePostController', function($scope, $window, sessionCache) {
+    projectX.controller('livePostController', function($scope, $http, $window, sessionCache) {
         $scope.init = function(){
             $('html,body').scrollTop(0);
             $scope.post = sessionCache.getLivePost();
             $scope.isFavBtnDisabled = _.find(sessionCache.getFavorites(), function(p)
                     { return p.guid == $scope.post.guid }) != null;
-            
+            $scope.isFlagBtnDisabled = sessionCache.didFlagPost($scope.post.guid);
             $scope.favBtnText = ($scope.isFavBtnDisabled) ? "Favorited!" : "Add to Favorites";
             $("#post-nav-btn").show();
         };
@@ -413,6 +433,28 @@
             sessionCache.addFavorite($scope.post);
             $scope.isFavBtnDisabled = true;
             $scope.favBtnText = "Favorited!"
+        };
+
+        $scope.onFlag = function(){
+            var json = JSON.stringify({guid: $scope.post.guid})
+            $http({
+                url:'/flag_post',
+                method:'POST',
+                dataType: 'JSON',
+                data: json,
+                headers: {'Content-Type': 'application/json'}
+            })
+            .success(function(data, status, headers, config) 
+            {
+                $scope.isFlagBtnDisabled = true;
+                sessionCache.flagPost($scope.post.guid);
+                bootbox.alert("Post has been flagged! Thanks for keeping an eye on things.");
+                console.info(data, status, headers, config);
+            })
+            .error(function(data, status, headers, config) 
+            {
+                console.error(data, status, headers, config);
+            });
         };
     });
 
@@ -479,14 +521,15 @@
         };
     });
 
-    // About Page Controller
-    projectX.controller('aboutController', function($scope) {
+    // Tips Page Controller
+    projectX.controller('tipsController', function() {
         $("#post-nav-btn").show();
-        $scope.message = 'I am an about page!';
     });
 
-    // Contact Page Controller
-    projectX.controller('contactController', function($scope) {
+    // About Page Controller
+    projectX.controller('aboutController', function() {
         $("#post-nav-btn").show();
-        $scope.message = 'We love to hear your feedback.';
     });
+
+
+

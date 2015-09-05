@@ -57,4 +57,17 @@ class dbService(object):
 			print "Error %d: %s" % (e.args[0], e.args[1])
 		finally:
 			cur.close()
-			return ""
+
+	def flagPost(self, guid):
+		"""
+		Flag a post by GUID
+		"""
+		try:
+			cur = self.con.cursor()
+			sql ="""UPDATE POST SET FLAG_COUNT = FLAG_COUNT + 1 WHERE GUID=%s"""
+			cur.execute(sql, (guid,))
+			self.con.commit()
+		except mdb.Error, e:
+			print "Error %d: %s" % (e.args[0], e.args[1])
+		finally:
+			cur.close()

@@ -41,8 +41,7 @@ textarea {
     padding:5px;
 }
 
-#header-text {
-    text-align: center;
+.dim-header {
     color: #999999;
 }
 

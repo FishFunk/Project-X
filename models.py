@@ -1,7 +1,7 @@
 """
 Models a user post object in the database. Accessible as a dictionary.
 """
-class Post:
+class Post(object):
 	def __init__(self, guid, title, desc, email, price, loc, phone):
 		self.postDict = dict()
 		self.postDict['guid'] = guid
