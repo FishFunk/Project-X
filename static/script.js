@@ -146,7 +146,7 @@
     });
 
     // configure routes
-    projectX.config(function($routeProvider) {
+    projectX.config(function($routeProvider, $locationProvider) {
         $routeProvider
         
         // Home page
@@ -167,6 +167,11 @@
             controller : 'createPostController'
         })
 
+        .when('/edit/:post_guid', {
+            templateUrl : 'static/partials/createPost.html',
+            controller : 'createPostController'
+        })
+
         // Results page
         .when('/results', {
             templateUrl : 'static/partials/results.html',
@@ -178,7 +183,7 @@
             controller : 'livePostController'
         })
 
-        .when('/previewPost', {
+        .when('/previewPost/:post_guid?', {
             templateUrl : 'static/partials/previewPost.html',
             controller : 'previewPostController'
         })
@@ -257,15 +262,48 @@
     });
 
     // Create Post Controller
-    projectX.controller('createPostController', function($scope, $location, $window, sessionCache, utils){
+    projectX.controller('createPostController', 
+        function($scope, $location, $window, sessionCache, utils, $routeParams, $http){
 
         var reader = new FileReader();
         var dropperFile = {};
 
+        $scope.editModeEnabled = $routeParams.post_guid != null;
+
         $scope.init = function(){
-            var newPost = sessionCache.getNewPost();
-            $scope.post = (newPost) ? newPost : {};
-            $scope.post.photos = ($scope.post.photos) ? $scope.post.photos : [];
+            if($scope.editModeEnabled)
+            {
+                var editPath = sprintf("/edit/%s", $routeParams.post_guid);
+                $http({
+                    url: editPath,
+                    method:'POST',
+                    dataType: 'JSON',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .success(function(data, status, headers, config) 
+                {
+                    console.info(data, status, headers, config);
+                    data.photos = _.map(data.photos, function(url){
+                        return {url: url};
+                    });
+                    _.first(data.photos).isMain = true;
+
+                    $scope.post = data;
+                })
+                .error(function(data, status, headers, config) 
+                {
+                    console.error(data, status, headers, config);
+                    bootbox.alert("There was a problem navigating to that URL.");
+                    $location.path("/")
+                });
+            }
+            else
+            {
+                var newPost = sessionCache.getNewPost();
+                $scope.post = (newPost) ? newPost : {};
+                $scope.post.photos = ($scope.post.photos) ? $scope.post.photos : [];
+
+            }
             $(".form-control").on("focus", function(){
                 $(this).removeClass("bad-input");
             });
@@ -286,6 +324,11 @@
         };
 
         $scope.onSelectFile = function() {
+            if($scope.post.photos.length == 8)
+            {
+                bootbox.alert("Woah there tiger! You can upload a maximum of 8 images, so choose wisely!")
+                return;
+            }
             $("input#file-input").click();
         };
 
@@ -325,10 +368,10 @@
                 $("input#title").addClass("bad-input");
                 message+=sprintf("%s. The 'Title' field can not be empty.<BR>", problemCount);
             }
-            if(!$scope.post.location || !utils.isNumeric($scope.post.location) || $scope.post.length > 9)
+            if(!$scope.post.zip_code || !utils.isNumeric($scope.post.zip_code) || $scope.post.length > 9)
             {
                 problemCount++;
-                $("input#location").addClass("bad-input");
+                $("input#zip_code").addClass("bad-input");
                 message+=sprintf("%s. Please enter a valid zip code.<BR>", problemCount);
             } 
             if(!$scope.post.price || !utils.isNumeric($scope.post.price))
@@ -362,7 +405,8 @@
             }
 
             sessionCache.setNewPost($scope.post);
-            $location.path('/previewPost');
+            var path = $scope.editModeEnabled ? sprintf("/previewPost/%s", $routeParams.post_guid) : "/previewPost"
+            $location.path(path);
         };
 
         $scope.onCancel = function(){
@@ -386,6 +430,34 @@
                 }
               }
             });
+        };
+
+        $scope.onDelete = function(){
+            bootbox.confirm("Are you sure you want to delete this post forever?", 
+                function(isConfirmed) 
+                {                
+                    if (isConfirmed) 
+                    {
+                        var json = JSON.stringify({guid: $routeParams.post_guid});
+                        $http({
+                            url: "/delete_post",
+                            method:'POST',
+                            dataType: 'JSON',
+                            headers: {'Content-Type': 'application/json'},
+                            data: json
+                        })
+                        .success(function(data, status, headers, config) 
+                        {
+                            console.info(data, status, headers, config);
+                            bootbox.alert("The deed is done.");
+                            $location.path("/");                        
+                        })
+                        .error(function(data, status, headers, config) 
+                        {
+                            console.error(data, status, headers, config);
+                        });
+                    } 
+                });
         };
     });
 
@@ -436,7 +508,7 @@
         };
 
         $scope.onFlag = function(){
-            var json = JSON.stringify({guid: $scope.post.guid})
+            var json = JSON.stringify({guid: $scope.post.guid});
             $http({
                 url:'/flag_post',
                 method:'POST',
@@ -459,9 +531,10 @@
     });
 
     // Preview Controller
-    projectX.controller('previewPostController', function($scope, $location, $http, sessionCache) {
+    projectX.controller('previewPostController', function($scope, $location, $http, sessionCache, $routeParams) {
 
         $scope.init = function() {
+            $scope.editModeEnabled = $routeParams.post_guid != null
             $scope.post = sessionCache.getNewPost();
             $scope.post.photos = [_.find($scope.post.photos, function(p){return p.isMain})]
             .concat(_.filter($scope.post.photos, function(p){return !p.isMain}));
@@ -473,11 +546,11 @@
         $scope.onSubmit = function() {
             _.each($scope.post.photos, function(p){
                 p.base64 = p.url.replace("data:image/jpeg;base64,", "");
-                //p.url = null;
             });
             var json = JSON.stringify($scope.post);
+            var path = $scope.editModeEnabled ? "/update" : "/upload";
             $http({
-                url:'/upload',
+                url: path,
                 method:'POST',
                 dataType: 'JSON',
                 data: json,
@@ -497,7 +570,8 @@
         };
 
         $scope.onBack = function() {
-            $location.path("/createPost");
+            var path = $scope.editModeEnabled ? sprintf("/edit/%s", $routeParams.post_guid) : "/createPost";
+            $location.path(path);
         };
     });
 
