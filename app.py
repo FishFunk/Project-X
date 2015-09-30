@@ -73,7 +73,7 @@ def update():
 		WritePhotos(post['guid'], post['photos'])
 		print "Successfully updated post"
 	except Exception, e:
-		print "DB Service Failure - failed to update post. %s, %s" % (e.args[0], e.args[1])
+		print "DB Service Failure - failed to update post. %s" % e
 	return ""
 
 @app.route('/image_uploads', methods=['GET'])

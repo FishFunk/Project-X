@@ -96,13 +96,14 @@ class dbService(object):
 		"""
 		try:
 			sesh = Session()
-			sesh.query(Post).filter_by(guid=post['guid']).update(
-				title=post['title'], 
-				description=post['description'],
-				email=post['email'],
-				price=post['price'],
-				zip_code=post['zip_code'],
-				phone=post['phone'])
+			sesh.query(Post).filter_by(guid=post['guid']).update({
+				"title":post['title'], 
+				"description":post['description'],
+				"email":post['email'],
+				"price":post['price'],
+				"zip_code":post['zip_code'],
+				"phone":post['phone']})
+			sesh.commit()
 		except Exception, e:
 			print "Error %s" % e
 			raise e
