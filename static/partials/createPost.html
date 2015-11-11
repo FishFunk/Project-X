@@ -1,34 +1,57 @@
 <div class="container-fluid">
   <div ng-Show="editModeEnabled" class="alert alert-info" role="alert">EDIT MODE</div>
   <div class="row">
-    <div class="col-xs-12 col-sm-6">
+    <div class="col-sm-12 col-md-6">
       <div id="form-panel" class="panel panel-default">
         <header class="panel-heading">
-          <h4 class="panel-title">Post Details</h4>
+          <h4 class="panel-title center-block">Post Details</h4>
         </header>
         <div class="panel-body">
-          <form role="form" class="form-inline">
-            <div class="form-group">
+          <form role="form" class="row">
+            <div class="post-input-div col-xs-8">
               <input id="title" type="text" ng-model="post.title" class="form-control" placeholder="What am I?" value="post.title">
-              <input id="zip" type="number" ng-model="post.zip" class="form-control" placeholder="Zip Code" value="post.zip">
-              <input id="price" type="number" ng-model="post.price" class="form-control" placeholder="$1,000,000" value="post.price">
+            </div>
+            <div class="post-input-div col-xs-4">
+              <input id="price" type="number" ng-model="post.price" class="form-control" placeholder="$1,000" value="post.price">
             </div>
           </form>
-          <form role="form">
-            <div class="form-group">
+          <form role="form" class="row">
+            <div class="post-input-div col-xs-12">
               <textarea id="desc" class="form-control" ng-model="post.desc" placeholder="Describe me!"></textarea>
             </div>
           </form>
-          <form role="form">
-            <div class="form-group">
-              <input id="email" type="email" ng-model="post.email" class="form-control" placeholder="johnny.appleseed@example.com">
-              <input id="phone" type="text" ng-model="post.phone" class="form-control" placeholder="123.456.7890">
-            </div>
-          </form>
+          <div class="visible-sm visible-md visible-lg">
+            <form role="form-group" class="row">
+              <div class="post-input-div col-sm-6">
+                <input id="email" type="email" ng-model="post.email" class="form-control" placeholder="jappleseed@example.com">
+              </div>
+              <div class="post-input-div col-sm-3">
+                <input id="phone" type="text" ng-model="post.phone" class="form-control" placeholder="Phone #">
+              </div>
+              <div class="post-input-div col-sm-3">
+                <input id="zip" type="number" ng-model="post.zip" class="form-control" placeholder="Zip Code" value="post.zip">
+              </div>
+            </form>
+          </div>
+          <div class="visible-xs">
+            <form role="form-group" class="row">
+                <div class="post-input-div">
+                  <input id="email" type="email" ng-model="post.email" class="form-control" placeholder="jappleseed@example.com">
+                </div>
+            </form>
+            <form role="form-group" class="row">
+              <div class="post-input-div col-xs-6">
+                <input id="phone" type="text" ng-model="post.phone" class="form-control" placeholder="Phone #">
+              </div>
+              <div class="post-input-div col-xs-6">
+                <input id="zip" type="number" ng-model="post.zip" class="form-control" placeholder="Zip Code" value="post.zip">
+              </div>
+            </form>   
+          </div>
         </div>
       </div><!--#form-panel-->
     </div>
-    <div class="col-xs-12 col-sm-6">
+    <div class="col-sm-12 col-md-6">
       <div id="img-upload-well" class="well well-lg">
         <button id="add-img-btn" class="btn btn-lg btn-default center-block" ng-click="onSelectFile()">Select Images</button>
         <p>Select the <i class="fa fa-star fa-2x"></i> to indicate your primary photo. If you change your mind, select the <i class="fa fa-trash-o fa-2x"></i> to delete a photo.</p>

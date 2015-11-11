@@ -1,7 +1,7 @@
 // script.js
 
     // Create the app module
-    var projectX = angular.module('projectX', ['ngRoute', 'ui.bootstrap', 'sprintf']);
+    var projectX = angular.module('projectX', ['ngRoute', 'ui.bootstrap']);
 
     // Database service
     projectX.factory('dbService', function ($http){
@@ -240,6 +240,11 @@
         $scope.init();
 
         $scope.search = function() {
+            if(!$scope.searchField)
+            {
+                bootbox.alert("Woah there tiger! Fill in the search box first!");
+                return;
+            }
             sessionCache.setSearchText($scope.searchField);
         	dbService.search($scope.searchField)
             .success(function(data, status, headers, config)
