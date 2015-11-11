@@ -3,12 +3,12 @@ app.py
 """
 
 from flask import *
-import os, json, uuid, urllib2, cookielib, utils, smtplib
+import os, json, uuid, urllib2, cookielib, utils, smtplib, shutil
 from email.mime.text import MIMEText
 from dbService import dbService
 from models import Post
 
-app = Flask(__name__)
+app = application = Flask(__name__)
 dbService = dbService()
 imgPath = "/Users/Daniel/bin/AppData/ProjectX/Images"
 app.config['UPLOAD_FOLDER'] = imgPath
@@ -34,10 +34,10 @@ def upload():
 	
 	reqJson = request.get_json()
 	newPost['title'] = reqJson.get('title')
-	newPost['description'] = reqJson.get('description')
+	newPost['desc'] = reqJson.get('desc')
 	newPost['email'] = reqJson.get('email')
 	newPost['price'] = reqJson.get('price')
-	newPost['zip_code'] = reqJson.get('zip_code')
+	newPost['zip'] = reqJson.get('zip')
 	newPost['phone'] = reqJson.get('phone')
 	newPost['guid'] = uuid.uuid4()
 
@@ -47,7 +47,7 @@ def upload():
 	try:
 		dbService.insertPost(newPost)
 		WritePhotos(newPost['guid'], photos)
-		SendConfirmEmail("FishFry62@gmail.com","FishFry62@gmail.com", newPost['guid'])
+		#SendConfirmEmail("FishFry62@gmail.com","FishFry62@gmail.com", newPost['guid'])
 		print "Successfully created post"
 	except Exception, e:
 		print "Failure creating post. %s" % e
@@ -60,10 +60,10 @@ def update():
 	
 	reqJson = request.get_json()
 	post['title'] = reqJson.get('title')
-	post['description'] = reqJson.get('description')
+	post['desc'] = reqJson.get('desc')
 	post['email'] = reqJson.get('email')
 	post['price'] = reqJson.get('price')
-	post['zip_code'] = reqJson.get('zip_code')
+	post['zip'] = reqJson.get('zip')
 	post['phone'] = reqJson.get('phone')
 	post['guid'] = reqJson.get('guid')
 	post['photos'] = reqJson.get('photos')
@@ -73,7 +73,7 @@ def update():
 		WritePhotos(post['guid'], post['photos'])
 		print "Successfully updated post"
 	except Exception, e:
-		print "DB Service Failure - failed to update post. %s" % e
+		print "Failed to update post - %s" % e
 	return ""
 
 @app.route('/image_uploads', methods=['GET'])
@@ -98,8 +98,9 @@ def delete_post():
 	try:
 		print "Deleting... #" + guid
 		dbService.deletePost(guid)
+		shutil.rmtree(os.path.join(imgPath, guid))
 	except Exception, e:
-		print "DB Service Failure - failed to delete post. %s" % e
+		print "Failed to delete post. %s" % e
 	return "OK"
 
 @app.route('/edit/<post_guid>', methods=['GET', 'POST'])
@@ -115,11 +116,11 @@ def edit_post(post_guid):
 	return result
 
 def SendConfirmEmail(sender, receiver, guid):
-	msg = "High five! Your post is now live on ProjectX.\
-	Made a mistake? Have no fear! Below is your unique link that you can use to make edits\
-	to your post if need be. This link is crafted just for you so be careful not to share\
-	this link with anybody or else they can mess up your beautiful post!\
-	\n\nhttp://localhost:8080/#/edit/%s" % guid
+	msg = '''High five! Your post is now live on ProjectX.
+	Made a mistake? Have no fear! Below is your unique link that you can use to make edits
+	to your post if need be. This link is crafted just for you so be careful not to share
+	this link with anybody or else they can mess up your beautiful post!
+	\n\nhttp://localhost:8080/#/edit/%s''' % guid
 
 	mimeTxt = MIMEText(msg)
 	mimeTxt['Subject'] = "ProjectX Post Created Successfully!"
@@ -136,18 +137,47 @@ def SendConfirmEmail(sender, receiver, guid):
 	s.quit()
 
 def WritePhotos(guid, photos):
-	count = 0
-	for p in photos:
-		filename = "%s.jpg" % count
+	try:
+		if photos is None or len(photos) < 1:
+			raise ValueError("Invalid parameter value for 'photos'.")
+		fileNameLen = 12
 		path = os.path.join(imgPath, str(guid))
+		diskImgs = utils.ReadFilesFromDirectory(path)
+		webImgs = list()
+		newImgsBase64 = list()
 
-		if count is 0 and "/image_uploads" in p['url']:
-			oldFileName = p['url'][-5:]
-			os.rename(os.path.join(path, oldFileName), os.path.join(path, filename))
-		elif "/image_uploads" not in p['url']:
-			utils.WriteBase64FileToPath(path, filename, p['base64'])
-		count+=1
+		for p in photos:
+			if "/image_uploads" not in p['url'] and photos.index(p) != 0:
+				newImgsBase64.append(p['base64'])
+			elif "/image_uploads" in p['url']:
+				idx = p['url'].index("filename=") + 9
+				imgName = p['url'][idx:]
+				webImgs.append(imgName)
+
+		## Delete expired images ##
+		imgsToDelete = set(diskImgs) - set(webImgs)
+		for img in imgsToDelete:
+			os.remove(os.path.join(path, img))
+
+		## Handle the primary image separately ##
+		primaryImg = photos[0]
+		if "/image_uploads" in primaryImg['url']:
+			idx = p['url'].index("filename=") + 9
+			imgName = p['url'][idx:]
+		else:
+			if(os.path.isfile(os.path.join(path, "0.jpg"))):
+				os.rename(os.path.join(path, mainFileName), \
+					os.path.join(path, utils.RandomWord(fileNameLen) + ".jpg"))
+			else:
+				utils.WriteBase64FileToPath(path, "0.jpg", primaryImg['base64'])
+
+		## Write the remaining new images ##
+		for newImg in newImgsBase64:
+			utils.WriteBase64FileToPath(path, utils.RandomWord(fileNameLen) + ".jpg", newImg)
+	except IOError, e:
+		print "IO Error - failed to create image files. %s" % e
 
 if __name__ == "__main__":
 	app.run(port=8080, debug=True)
 	#app.run(host='0.0.0.0', debug=True) # public on network
+

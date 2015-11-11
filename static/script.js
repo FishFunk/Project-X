@@ -221,7 +221,8 @@
                 "You've come to the right place!",
                 "Let's find some good deals!",
                 "Hello Friend!",
-                "Fancy meeting you here. Come here often?"
+                "Fancy meeting you here...",
+                "Come here often?"
             ];
 
             $scope.header = _.sample(msgs);
@@ -368,10 +369,10 @@
                 $("input#title").addClass("bad-input");
                 message+=sprintf("%s. The 'Title' field can not be empty.<BR>", problemCount);
             }
-            if(!$scope.post.zip_code || !utils.isNumeric($scope.post.zip_code) || $scope.post.length > 9)
+            if(!$scope.post.zip || !utils.isNumeric($scope.post.zip) || $scope.post.length > 9)
             {
                 problemCount++;
-                $("input#zip_code").addClass("bad-input");
+                $("input#zip").addClass("bad-input");
                 message+=sprintf("%s. Please enter a valid zip code.<BR>", problemCount);
             } 
             if(!$scope.post.price || !utils.isNumeric($scope.post.price))
@@ -380,10 +381,10 @@
                 $("input#price").addClass("bad-input");
                 message+=sprintf("%s. Please enter a valid price value.<BR>", problemCount);
             }
-            if(!$scope.post.description)
+            if(!$scope.post.desc)
             {
                 problemCount++;
-                $("textarea#description").addClass("bad-input");
+                $("textarea#desc").addClass("bad-input");
                 message+=sprintf("%s. 'Description' is a required field.<BR>", problemCount);
             }
             if(!$scope.post.email || !utils.isValidEmail($scope.post.email))

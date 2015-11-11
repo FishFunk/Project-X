@@ -4,25 +4,24 @@ import formatter, datetime, ast, json
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from models import Post
 
 Base = declarative_base()
 engine = create_engine("mysql+mysqldb://root:qwerty01@localhost/projectx", pool_recycle="3600")
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
-class Post(Base):
-	__tablename__ = "Post"
+class post(Base):
+	__tablename__ = "post"
 	id = Column(Integer, Sequence("post_id_seq"), primary_key=True)
 	guid = Column(String(40))
 	title = Column(String(100))
-	description = Column(String(500))
+	desc = Column(String(500))
 	email = Column(String(30))
 	price = Column(Integer)
-	zip_code = Column(Integer)
+	zip = Column(Integer)
 	phone = Column(String(20))
-	date_added = Column(Date)
-	flag_count = Column(Integer, default=0)
+	date = Column(Date)
+	flags = Column(Integer, default=0)
 
 class dbService(object):
 
@@ -42,12 +41,12 @@ class dbService(object):
 		"""
 		Query the database and return results with text matching 'searchVal' in the Title and/or the Body columns.
 		@param - str
-		@return - list<Post>
+		@return - list<post>
 		"""
 		try:
 			sesh = Session()
-			q = sesh.query(Post).filter(or_(Post.title.like('%'+searchVal+'%'), 
-				Post.description.like('%'+searchVal+'%')))
+			q = sesh.query(post).filter(or_(post.title.like('%'+searchVal+'%'), 
+				post.desc.like('%'+searchVal+'%')))
 			posts = self._multiRowToDict(q.all())
 			print "Found %s posts" % len(posts)
 			return posts
@@ -60,7 +59,7 @@ class dbService(object):
 		"""
 		try:
 			sesh = Session()
-			q = sesh.query(Post).filter(Post.guid==guid)
+			q = sesh.query(post).filter(post.guid==guid)
 			post = q.first()
 			if post is None:
 				raise Exception("POST GUID not found.")
@@ -68,21 +67,21 @@ class dbService(object):
 		except Exception, e:
 			print "Error %s" % e
 
-	def insertPost(self, post):
+	def insertPost(self, newPost):
 		"""
 		Insert a post object into the database.
 		"""
 		date = datetime.date.today()
 		try:
-			p = Post(
-				guid=post['guid'], 
-				title=post['title'], 
-				description=post['description'],
-				email=post['email'],
-				price=post['price'],
-				zip_code=post['zip_code'],
-				phone=post['phone'],
-				date_added=date)
+			p = post(
+				guid=newPost['guid'], 
+				title=newPost['title'], 
+				desc=newPost['desc'],
+				email=newPost['email'],
+				price=newPost['price'],
+				zip=newPost['zip'],
+				phone=newPost['phone'],
+				date=date)
 			sesh = Session()
 			sesh.add(p)
 			sesh.commit()
@@ -96,12 +95,12 @@ class dbService(object):
 		"""
 		try:
 			sesh = Session()
-			sesh.query(Post).filter_by(guid=post['guid']).update({
+			sesh.query(post).filter_by(guid=post['guid']).update({
 				"title":post['title'], 
-				"description":post['description'],
+				"desc":post['desc'],
 				"email":post['email'],
 				"price":post['price'],
-				"zip_code":post['zip_code'],
+				"zip":post['zip'],
 				"phone":post['phone']})
 			sesh.commit()
 		except Exception, e:
@@ -114,17 +113,16 @@ class dbService(object):
 		"""
 		try:
 			sesh = Session()
-			post = sesh.query(Post).filter(Post.guid==guid).first()
-			sesh.query(Post).update({"flag_count":post.flag_count + 1})
+			sesh.query(post).filter(post.guid==guid).update({"flags":post.flags + 1})
 			sesh.commit()
 		except Exception, e:
-			print "Error %d: %s" % e
+			print "Error %s" % e
 			raise e
 
 	def deletePost(self, guid):
 		try:
 			sesh = Session()
-			sesh.query(Post).filter(Post.guid==guid).delete()
+			sesh.query(post).filter(post.guid==guid).delete()
 			sesh.commit()
 		except Exception, e:
 			raise e
@@ -135,7 +133,7 @@ class dbService(object):
 		try:
 			now = datetime.date.today()
 			sesh = Session()
-			sesh.query(Post).filter(Post.date_added==now).delete()
+			sesh.query(post).filter(post.date==now).delete()
 			sesh.commit()
 		except Exception, e:
 			raise e
@@ -143,8 +141,8 @@ class dbService(object):
 	def _singleRowToDict(self, row):
 		d = row.__dict__
 		d.pop('_sa_instance_state')
-		d.pop('date_added')
-		d.pop('flag_count')
+		d.pop('date')
+		d.pop('flags')
 		return d
 
 	def _multiRowToDict(self, rows):
@@ -155,7 +153,7 @@ class dbService(object):
 		for r in rows:
 			d = r.__dict__
 			d.pop('_sa_instance_state')
-			d.pop('date_added')
-			d.pop('flag_count')
+			d.pop('date')
+			d.pop('flags')
 			dicts.append(d)
 		return dicts

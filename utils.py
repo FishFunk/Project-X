@@ -1,7 +1,7 @@
 """ 
 utils.py
 """
-import os
+import os, random, string
 
 def WriteBase64FileToPath(fileDir, fileName, base64):
 	try:
@@ -23,3 +23,6 @@ def ReadFilesFromDirectory(directory):
 	except OSError, e:
 		print "Failed to read files from %s. %s." % (directory, e.args[1])
 		return []
+
+def RandomWord(length=10):
+	return ''.join(random.choice(string.lowercase) for i in range (length))
