@@ -1,4 +1,5 @@
 <div class="container-fluid">
+  <div ng-Show="editModeEnabled" class="alert alert-info" role="alert">EDIT MODE</div>
   <div class="row">
     <div class="col-xs-12 col-sm-6">
       <div id="form-panel" class="panel panel-default">
@@ -9,13 +10,13 @@
           <form role="form" class="form-inline">
             <div class="form-group">
               <input id="title" type="text" ng-model="post.title" class="form-control" placeholder="What am I?" value="post.title">
-              <input id="location" type="number" ng-model="post.location" class="form-control" placeholder="Zip Code" value="post.location">
+              <input id="zip" type="number" ng-model="post.zip" class="form-control" placeholder="Zip Code" value="post.zip">
               <input id="price" type="number" ng-model="post.price" class="form-control" placeholder="$1,000,000" value="post.price">
             </div>
           </form>
           <form role="form">
             <div class="form-group">
-              <textarea id="description" class="form-control" ng-model="post.description" placeholder="Describe me!"></textarea>
+              <textarea id="desc" class="form-control" ng-model="post.desc" placeholder="Describe me!"></textarea>
             </div>
           </form>
           <form role="form">
@@ -43,10 +44,12 @@
         </ul>
       </div>
     </div>
+
   </div><!--.row-->
 
   <div class="row">
     <div class="center-block">
+        <button ng-Show="editModeEnabled" class="btn btn-lg btn-danger" ng-click="onDelete()">DELETE</button>
         <button class="btn btn-lg btn-default" ng-click="onCancel()">Cancel</button>
         <button class="btn btn-lg btn-primary" ng-click="onPreview()">Preview</button>
     </div>
